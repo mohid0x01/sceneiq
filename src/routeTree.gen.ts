@@ -13,6 +13,11 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardViewerRouteImport } from './routes/dashboard/viewer'
+import { Route as DashboardSubmitRouteImport } from './routes/dashboard/submit'
+import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
+import { Route as DashboardProcessingRouteImport } from './routes/dashboard/processing'
+import { Route as DashboardArchiveRouteImport } from './routes/dashboard/archive'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -34,16 +39,51 @@ const DashboardIndexRoute = DashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardViewerRoute = DashboardViewerRouteImport.update({
+  id: '/viewer',
+  path: '/viewer',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardSubmitRoute = DashboardSubmitRouteImport.update({
+  id: '/submit',
+  path: '/submit',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardProcessingRoute = DashboardProcessingRouteImport.update({
+  id: '/processing',
+  path: '/processing',
+  getParentRoute: () => DashboardRoute,
+} as any)
+const DashboardArchiveRoute = DashboardArchiveRouteImport.update({
+  id: '/archive',
+  path: '/archive',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
+  '/dashboard/archive': typeof DashboardArchiveRoute
+  '/dashboard/processing': typeof DashboardProcessingRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/submit': typeof DashboardSubmitRoute
+  '/dashboard/viewer': typeof DashboardViewerRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/dashboard/archive': typeof DashboardArchiveRoute
+  '/dashboard/processing': typeof DashboardProcessingRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/submit': typeof DashboardSubmitRoute
+  '/dashboard/viewer': typeof DashboardViewerRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
@@ -51,14 +91,46 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
   '/login': typeof LoginRoute
+  '/dashboard/archive': typeof DashboardArchiveRoute
+  '/dashboard/processing': typeof DashboardProcessingRoute
+  '/dashboard/settings': typeof DashboardSettingsRoute
+  '/dashboard/submit': typeof DashboardSubmitRoute
+  '/dashboard/viewer': typeof DashboardViewerRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/login' | '/dashboard/'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/dashboard/archive'
+    | '/dashboard/processing'
+    | '/dashboard/settings'
+    | '/dashboard/submit'
+    | '/dashboard/viewer'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/dashboard'
-  id: '__root__' | '/' | '/dashboard' | '/login' | '/dashboard/'
+  to:
+    | '/'
+    | '/login'
+    | '/dashboard/archive'
+    | '/dashboard/processing'
+    | '/dashboard/settings'
+    | '/dashboard/submit'
+    | '/dashboard/viewer'
+    | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/login'
+    | '/dashboard/archive'
+    | '/dashboard/processing'
+    | '/dashboard/settings'
+    | '/dashboard/submit'
+    | '/dashboard/viewer'
+    | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -97,14 +169,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardIndexRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/viewer': {
+      id: '/dashboard/viewer'
+      path: '/viewer'
+      fullPath: '/dashboard/viewer'
+      preLoaderRoute: typeof DashboardViewerRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/submit': {
+      id: '/dashboard/submit'
+      path: '/submit'
+      fullPath: '/dashboard/submit'
+      preLoaderRoute: typeof DashboardSubmitRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/settings': {
+      id: '/dashboard/settings'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardSettingsRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/processing': {
+      id: '/dashboard/processing'
+      path: '/processing'
+      fullPath: '/dashboard/processing'
+      preLoaderRoute: typeof DashboardProcessingRouteImport
+      parentRoute: typeof DashboardRoute
+    }
+    '/dashboard/archive': {
+      id: '/dashboard/archive'
+      path: '/archive'
+      fullPath: '/dashboard/archive'
+      preLoaderRoute: typeof DashboardArchiveRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
 interface DashboardRouteChildren {
+  DashboardArchiveRoute: typeof DashboardArchiveRoute
+  DashboardProcessingRoute: typeof DashboardProcessingRoute
+  DashboardSettingsRoute: typeof DashboardSettingsRoute
+  DashboardSubmitRoute: typeof DashboardSubmitRoute
+  DashboardViewerRoute: typeof DashboardViewerRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardArchiveRoute: DashboardArchiveRoute,
+  DashboardProcessingRoute: DashboardProcessingRoute,
+  DashboardSettingsRoute: DashboardSettingsRoute,
+  DashboardSubmitRoute: DashboardSubmitRoute,
+  DashboardViewerRoute: DashboardViewerRoute,
   DashboardIndexRoute: DashboardIndexRoute,
 }
 
