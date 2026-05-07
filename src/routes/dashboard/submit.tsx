@@ -1,16 +1,25 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { submitFir, runMockPipeline } from "@/server/fir.functions";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/dashboard/submit")({
   component: SubmitFIR,
 });
 
 const districts = ["Khairpur", "Sukkur", "Larkana", "Hyderabad", "Karachi South", "Karachi East", "Thatta", "Dadu", "Nawabshah"];
-const incidentTypes = ["Theft", "Assault", "Vehicular", "Property", "Kidnapping", "Robbery", "Other"];
+const incidentTypes = [
+  { label: "Theft", value: "theft" },
+  { label: "Assault", value: "assault" },
+  { label: "Vehicular", value: "vehicular" },
+  { label: "Property", value: "property" },
+  { label: "Kidnapping", value: "kidnapping" },
+  { label: "Robbery", value: "robbery" },
+  { label: "Other", value: "other" },
+] as const;
 const pipelineStages = ["Preprocessing", "Entity Extraction", "Spatial Resolution", "Timeline Sequencing", "Scene Generation"];
-
 const tips = [
   "Include all actor descriptions as stated",
   "Mention locations by name or landmark",
@@ -21,11 +30,53 @@ const tips = [
 
 function SubmitFIR() {
   const [narrative, setNarrative] = useState("");
+  const [caseNumber, setCaseNumber] = useState("FIR-2024-SHK-00143");
+  const [district, setDistrict] = useState("Khairpur");
+  const [incidentDate, setIncidentDate] = useState("");
+  const [incidentType, setIncidentType] = useState<typeof incidentTypes[number]["value"]>("assault");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const submitFirFn = useServerFn(submitFir);
+  const runPipelineFn = useServerFn(runMockPipeline);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    navigate({ to: "/dashboard/processing" });
+    if (narrative.length < 10) {
+      setError("Narrative must be at least 10 characters.");
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        navigate({ to: "/login" });
+        return;
+      }
+
+      const result = await submitFirFn({
+        data: {
+          caseNumber,
+          district,
+          incidentDate: incidentDate || null,
+          incidentType,
+          narrative,
+        },
+      });
+
+      // Fire pipeline in background (don't await)
+      runPipelineFn({ data: { jobId: result.jobId } }).catch(console.error);
+
+      // Navigate to processing page with jobId
+      navigate({ to: "/dashboard/processing", search: { jobId: result.jobId } });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to submit FIR");
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -39,19 +90,30 @@ function SubmitFIR() {
         <h1 className="font-display text-3xl font-bold text-text-primary">Submit FIR for Reconstruction</h1>
         <div className="gold-divider mt-2" style={{ width: "60px" }} />
 
+        {error && (
+          <div className="mt-4 rounded-[4px] border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div className="grid gap-5 md:grid-cols-2">
             <div>
               <label className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">Case Number</label>
               <input
                 type="text"
-                defaultValue="FIR-2024-SHK-00143"
+                value={caseNumber}
+                onChange={(e) => setCaseNumber(e.target.value)}
                 className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 font-mono text-sm text-gold placeholder:text-text-muted focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
               />
             </div>
             <div>
               <label className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">District</label>
-              <select className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 text-sm text-text-primary focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold">
+              <select
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+                className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 text-sm text-text-primary focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+              >
                 {districts.map(d => <option key={d}>{d}</option>)}
               </select>
             </div>
@@ -62,13 +124,19 @@ function SubmitFIR() {
               <label className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">Date of Incident</label>
               <input
                 type="date"
+                value={incidentDate}
+                onChange={(e) => setIncidentDate(e.target.value)}
                 className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 text-sm text-text-primary focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
               />
             </div>
             <div>
               <label className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">Incident Type</label>
-              <select className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 text-sm text-text-primary focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold">
-                {incidentTypes.map(t => <option key={t}>{t}</option>)}
+              <select
+                value={incidentType}
+                onChange={(e) => setIncidentType(e.target.value as typeof incidentType)}
+                className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 text-sm text-text-primary focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+              >
+                {incidentTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
           </div>
@@ -91,9 +159,10 @@ function SubmitFIR() {
 
           <button
             type="submit"
-            className="w-full rounded-[6px] bg-gold py-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-background shadow-[0_2px_12px_rgba(201,168,76,0.25)] transition-all duration-200 hover:bg-gold-light hover:scale-[1.01]"
+            disabled={submitting}
+            className="w-full rounded-[6px] bg-gold py-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-background shadow-[0_2px_12px_rgba(201,168,76,0.25)] transition-all duration-200 hover:bg-gold-light hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Process FIR →
+            {submitting ? "Submitting..." : "Process FIR →"}
           </button>
         </form>
       </motion.div>

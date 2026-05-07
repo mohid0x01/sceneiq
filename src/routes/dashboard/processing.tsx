@@ -1,11 +1,28 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Check, Loader } from "lucide-react";
+import { useJobRealtime } from "@/hooks/useJobRealtime";
+import { z } from "zod";
+
+const searchSchema = z.object({
+  jobId: z.string().optional(),
+});
 
 export const Route = createFileRoute("/dashboard/processing")({
+  validateSearch: (search) => searchSchema.parse(search),
   component: ProcessingPage,
 });
+
+const stageMap: Record<string, number> = {
+  pending: -1,
+  preprocessing: 0,
+  entity_extraction: 1,
+  spatial_resolution: 2,
+  timeline_sequencing: 3,
+  scene_generation: 4,
+  completed: 5,
+  failed: -2,
+};
 
 const stages = [
   { title: "Preprocessing & Language Normalization", desc: "Detecting language, normalizing Roman Urdu transliterations" },
@@ -16,28 +33,23 @@ const stages = [
 ];
 
 function ProcessingPage() {
-  const [active, setActive] = useState(0);
+  const { jobId } = Route.useSearch();
   const navigate = useNavigate();
+  const job = useJobRealtime(jobId || null);
 
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActive((prev) => {
-        if (prev >= stages.length - 1) {
-          clearInterval(timer);
-          setTimeout(() => navigate({ to: "/dashboard/viewer" }), 1200);
-          return prev;
-        }
-        return prev + 1;
-      });
-    }, 2500);
-    return () => clearInterval(timer);
-  }, [navigate]);
+  const currentStage = job ? stageMap[job.status] ?? -1 : -1;
+  const isCompleted = job?.status === "completed";
+  const isFailed = job?.status === "failed";
 
-  const progress = ((active + 1) / stages.length) * 100;
+  // Auto-navigate on completion
+  if (isCompleted && jobId) {
+    setTimeout(() => navigate({ to: "/dashboard/viewer", search: { jobId } }), 1200);
+  }
+
+  const progress = isCompleted ? 100 : Math.max(0, ((currentStage + 1) / stages.length) * 100);
 
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center">
-      {/* Top progress bar */}
       <div className="fixed left-60 right-0 top-0 z-50 h-[2px] bg-border-subtle">
         <motion.div
           className="h-full bg-gold"
@@ -52,13 +64,20 @@ function ProcessingPage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <p className="font-mono text-lg text-gold">JOB-2024-SHK-00143</p>
-        <h1 className="mt-2 font-display text-3xl font-bold text-text-primary">Processing Your FIR</h1>
-        <p className="mt-2 text-sm text-text-muted">Do not close this tab. Your reconstruction is being generated.</p>
+        <p className="font-mono text-lg text-gold">{jobId ? jobId.slice(0, 8).toUpperCase() : "..."}</p>
+        <h1 className="mt-2 font-display text-3xl font-bold text-text-primary">
+          {isFailed ? "Pipeline Failed" : isCompleted ? "Reconstruction Complete" : "Processing Your FIR"}
+        </h1>
+        {isFailed && (
+          <p className="mt-2 text-sm text-destructive">{job?.error_message || "An error occurred"}</p>
+        )}
+        {!isFailed && !isCompleted && (
+          <p className="mt-2 text-sm text-text-muted">Do not close this tab. Your reconstruction is being generated.</p>
+        )}
 
         <div className="mt-12 space-y-4 text-left">
           {stages.map((stage, i) => {
-            const status = i < active ? "complete" : i === active ? "active" : "pending";
+            const status = isCompleted || i < currentStage ? "complete" : i === currentStage ? "active" : "pending";
             return (
               <motion.div
                 key={stage.title}
@@ -104,7 +123,9 @@ function ProcessingPage() {
           })}
         </div>
 
-        <p className="mt-8 font-mono text-[12px] text-text-muted">Estimated time remaining: calculating...</p>
+        <p className="mt-8 font-mono text-[12px] text-text-muted">
+          {isCompleted ? "Redirecting to 3D viewer..." : isFailed ? "Please try again." : `Processing time: ${job?.processing_time_ms ? `${(job.processing_time_ms / 1000).toFixed(1)}s` : "calculating..."}`}
+        </p>
       </motion.div>
     </div>
   );
