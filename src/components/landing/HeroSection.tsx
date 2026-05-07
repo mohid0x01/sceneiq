@@ -12,11 +12,11 @@ export function HeroSection() {
         <img
           src={heroImage}
           alt="Officer silhouette"
-          className="absolute right-0 top-0 h-full w-[60%] object-cover object-center"
+          className="absolute right-0 top-0 h-full w-full object-cover object-right md:w-[60%]"
           width={960}
           height={1080}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/98 to-background/40 md:via-background/95" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
 
