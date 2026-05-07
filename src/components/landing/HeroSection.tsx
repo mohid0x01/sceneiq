@@ -12,11 +12,11 @@ export function HeroSection() {
         <img
           src={heroImage}
           alt="Officer silhouette"
-          className="absolute right-0 top-0 h-full w-[60%] object-cover object-center"
+          className="absolute right-0 top-0 h-full w-full object-cover object-right md:w-[60%]"
           width={960}
           height={1080}
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/95 to-background/40" />
+        <div className="absolute inset-0 bg-gradient-to-r from-background via-background/98 to-background/40 md:via-background/95" />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
 
@@ -25,7 +25,7 @@ export function HeroSection() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-20">
         <motion.div
-          className="max-w-[55%]"
+          className="max-w-full px-2 md:max-w-[55%] md:px-0"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
@@ -36,7 +36,7 @@ export function HeroSection() {
 
           <GoldDivider />
 
-          <h1 className="font-display text-5xl font-bold leading-[1.1] text-text-primary lg:text-[64px]">
+          <h1 className="font-display text-3xl font-bold leading-[1.1] text-text-primary md:text-5xl lg:text-[64px]">
             We Turn Unstructured FIR Text Into Visual Crime Reconstructions
           </h1>
 
