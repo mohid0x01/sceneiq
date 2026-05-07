@@ -25,7 +25,7 @@ export function HeroSection() {
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-20">
         <motion.div
-          className="max-w-[55%]"
+          className="max-w-full px-2 md:max-w-[55%] md:px-0"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
