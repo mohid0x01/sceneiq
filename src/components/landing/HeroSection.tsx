@@ -36,7 +36,7 @@ export function HeroSection() {
 
           <GoldDivider />
 
-          <h1 className="font-display text-5xl font-bold leading-[1.1] text-text-primary lg:text-[64px]">
+          <h1 className="font-display text-3xl font-bold leading-[1.1] text-text-primary md:text-5xl lg:text-[64px]">
             We Turn Unstructured FIR Text Into Visual Crime Reconstructions
           </h1>
 
