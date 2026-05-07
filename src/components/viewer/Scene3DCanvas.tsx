@@ -1,47 +1,39 @@
-"use client";
 import { useRef, useMemo } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Grid, Html, Environment } from "@react-three/drei";
+import { OrbitControls, Grid, Html } from "@react-three/drei";
 import * as THREE from "three";
 import { useSceneStore } from "@/stores/sceneStore";
+import type { Tables } from "@/integrations/supabase/types";
 
-// Entity data with positions per event
-const entityData = [
-  {
-    name: "Ahmed",
-    role: "suspect" as const,
-    color: "#ef4444",
-    positions: [
-      [0, 0, -8], [0, 0, -4], [0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 8],
-    ],
-  },
-  {
-    name: "Imran",
-    role: "victim" as const,
-    color: "#3b82f6",
-    positions: [
-      [4, 0, 2], [3, 0, 1], [1, 0, 0], [1, 0.05, -0.5], [1, 0.05, -0.5], [1, 0.05, -0.5],
-    ],
-  },
-  {
-    name: "Rizwan",
-    role: "witness" as const,
-    color: "#22c55e",
-    positions: [
-      [8, 0, 6], [8, 0, 6], [8, 0, 6], [8, 0, 5], [7, 0, 4], [7, 0, 4],
-    ],
-  },
-];
+type SceneEntity = Tables<"scene_entities">;
+type SceneEvent = Tables<"scene_events">;
 
-const locationBeacons = [
-  { name: "Bazaar Road Crossing", pos: [0, 0, 0] as [number, number, number] },
-  { name: "Atta Flour Mill", pos: [4, 0, 2] as [number, number, number] },
-  { name: "Pir Jo Goth Chowk", pos: [8, 0, 6] as [number, number, number] },
-];
+interface Scene3DCanvasProps {
+  entities: SceneEntity[];
+  events: SceneEvent[];
+}
 
-function EntityFigure({ name, color, positions }: { name: string; color: string; positions: number[][] }) {
+function EntityFigure({ entity, events }: { entity: SceneEntity; events: SceneEvent[] }) {
   const meshRef = useRef<THREE.Mesh>(null);
   const currentEvent = useSceneStore((s) => s.currentEvent);
+
+  // Compute position per event from events data
+  const positions = useMemo(() => {
+    if (events.length === 0) {
+      return [[entity.position_x || 0, entity.position_y || 0, entity.position_z || 0]];
+    }
+    let pos = [entity.position_x || 0, entity.position_y || 0, entity.position_z || 0];
+    const result: number[][] = [];
+    for (let i = 0; i < events.length; i++) {
+      const evt = events.find(e => e.sequence_number === i + 1 && e.entity_id === entity.id);
+      if (evt) {
+        pos = [evt.dest_x || pos[0], evt.dest_y || pos[1], evt.dest_z || pos[2]];
+      }
+      result.push([...pos]);
+    }
+    return result;
+  }, [entity, events]);
+
   const targetPos = useMemo(() => {
     const p = positions[Math.min(currentEvent, positions.length - 1)];
     return new THREE.Vector3(p[0], p[1] + 0.75, p[2]);
@@ -53,33 +45,28 @@ function EntityFigure({ name, color, positions }: { name: string; color: string;
     }
   });
 
+  const color = entity.color || "#C9A84C";
+
   return (
     <group>
       <mesh ref={meshRef} position={[positions[0][0], positions[0][1] + 0.75, positions[0][2]]}>
-        {/* Body */}
         <capsuleGeometry args={[0.25, 0.8, 8, 16]} />
         <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} transparent opacity={0.85} />
-        {/* Head */}
         <mesh position={[0, 0.7, 0]}>
           <sphereGeometry args={[0.2, 16, 16]} />
           <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} transparent opacity={0.85} />
         </mesh>
         <Html distanceFactor={12} position={[0, 1.2, 0]} center>
           <div className="rounded-[2px] bg-background/80 px-2 py-0.5 text-[10px] font-semibold backdrop-blur-sm whitespace-nowrap" style={{ color }}>
-            {name}
+            {entity.label}
           </div>
         </Html>
-      </mesh>
-      {/* Ground glow */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[positions[0][0], 0.01, positions[0][2]]}>
-        <circleGeometry args={[0.5, 32]} />
-        <meshBasicMaterial color={color} transparent opacity={0.15} />
       </mesh>
     </group>
   );
 }
 
-function LocationBeacon({ name, pos }: { name: string; pos: [number, number, number] }) {
+function LocationBeacon({ entity }: { entity: SceneEntity }) {
   const ringRef = useRef<THREE.Mesh>(null);
   useFrame(({ clock }) => {
     if (ringRef.current) {
@@ -87,6 +74,8 @@ function LocationBeacon({ name, pos }: { name: string; pos: [number, number, num
       ringRef.current.scale.set(s, s, s);
     }
   });
+
+  const pos: [number, number, number] = [entity.position_x || 0, 0, entity.position_z || 0];
 
   return (
     <group position={pos}>
@@ -100,29 +89,36 @@ function LocationBeacon({ name, pos }: { name: string; pos: [number, number, num
       </mesh>
       <Html distanceFactor={15} position={[0, 0.5, 0]} center>
         <div className="rounded-[2px] bg-gold/10 px-2 py-0.5 text-[9px] font-semibold text-gold backdrop-blur-sm whitespace-nowrap border border-gold/20">
-          {name}
+          {entity.label}
         </div>
       </Html>
     </group>
   );
 }
 
-function MovementTrails() {
+function MovementTrails({ entities, events }: { entities: SceneEntity[]; events: SceneEvent[] }) {
   const currentEvent = useSceneStore((s) => s.currentEvent);
+  const actorEntities = entities.filter(e => e.entity_type === "actor");
+
   return (
     <group>
-      {entityData.map((entity) => {
+      {actorEntities.map((entity) => {
         const points: THREE.Vector3[] = [];
-        for (let i = 0; i <= Math.min(currentEvent, entity.positions.length - 1); i++) {
-          const p = entity.positions[i];
-          points.push(new THREE.Vector3(p[0], 0.05, p[2]));
+        let pos = [entity.position_x || 0, 0.05, entity.position_z || 0];
+        points.push(new THREE.Vector3(pos[0], pos[1], pos[2]));
+        for (let i = 0; i < Math.min(currentEvent + 1, events.length); i++) {
+          const evt = events[i];
+          if (evt.entity_id === entity.id) {
+            points.push(new THREE.Vector3(evt.dest_x || pos[0], 0.05, evt.dest_z || pos[2]));
+            pos = [evt.dest_x || pos[0], 0.05, evt.dest_z || pos[2]];
+          }
         }
         if (points.length < 2) return null;
         const curve = new THREE.CatmullRomCurve3(points);
         return (
-          <mesh key={entity.name}>
+          <mesh key={entity.id}>
             <tubeGeometry args={[curve, 20, 0.02, 8, false]} />
-            <meshBasicMaterial color={entity.color} transparent opacity={0.4} />
+            <meshBasicMaterial color={entity.color || "#C9A84C"} transparent opacity={0.4} />
           </mesh>
         );
       })}
@@ -130,11 +126,14 @@ function MovementTrails() {
   );
 }
 
-export function Scene3DCanvas() {
+export function Scene3DCanvas({ entities, events }: Scene3DCanvasProps) {
+  const actorEntities = entities.filter(e => e.entity_type === "actor" || e.entity_type === "vehicle");
+  const locationEntities = entities.filter(e => e.entity_type === "location");
+
   return (
     <Canvas
       camera={{ position: [12, 10, 12], fov: 50, near: 0.1, far: 200 }}
-      style={{ background: "#050810" }}
+      style={{ background: "#050810", width: "100%", height: "100%" }}
       gl={{ antialias: true, toneMapping: THREE.ACESFilmicToneMapping }}
     >
       <ambientLight intensity={0.3} />
@@ -155,15 +154,15 @@ export function Scene3DCanvas() {
         position={[0, 0, 0]}
       />
 
-      {entityData.map((e) => (
-        <EntityFigure key={e.name} name={e.name} color={e.color} positions={e.positions} />
+      {actorEntities.map((e) => (
+        <EntityFigure key={e.id} entity={e} events={events} />
       ))}
 
-      {locationBeacons.map((l) => (
-        <LocationBeacon key={l.name} name={l.name} pos={l.pos} />
+      {locationEntities.map((l) => (
+        <LocationBeacon key={l.id} entity={l} />
       ))}
 
-      <MovementTrails />
+      <MovementTrails entities={entities} events={events} />
 
       <OrbitControls
         makeDefault
