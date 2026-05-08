@@ -95,6 +95,42 @@ export const getMyJobs = createServerFn({ method: "POST" })
     return data || [];
   });
 
+export const cancelJob = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { jobId: string }) => z.object({ jobId: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const { error } = await supabase
+      .from("fir_jobs")
+      .update({ status: "failed" as const, error_message: "Cancelled by officer" })
+      .eq("id", data.jobId);
+    if (error) throw new Error(error.message);
+    return { success: true };
+  });
+
+export const retryJob = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: { jobId: string }) => z.object({ jobId: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    // Reset job status
+    const { error } = await supabase
+      .from("fir_jobs")
+      .update({
+        status: "pending" as const,
+        error_message: null,
+        pipeline_progress: {},
+        processing_time_ms: null,
+        scene_manifest: null,
+      })
+      .eq("id", data.jobId);
+    if (error) throw new Error(error.message);
+    // Delete old scene data
+    await supabase.from("scene_entities").delete().eq("job_id", data.jobId);
+    await supabase.from("scene_events").delete().eq("job_id", data.jobId);
+    return { success: true };
+  });
+
 export const runMockPipeline = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: { jobId: string }) => z.object({ jobId: z.string().uuid() }).parse(data))
