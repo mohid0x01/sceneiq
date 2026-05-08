@@ -157,13 +157,15 @@ function SubmitFIR() {
             </div>
           </div>
 
-          <button
+          <motion.button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-[6px] bg-gold py-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] text-background shadow-[0_2px_12px_rgba(201,168,76,0.25)] transition-all duration-200 hover:bg-gold-light hover:scale-[1.01] disabled:opacity-50 disabled:cursor-not-allowed"
+            className="glass-button-primary w-full rounded-[6px] py-3.5 text-[13px] font-semibold uppercase tracking-[0.1em] disabled:opacity-50 disabled:cursor-not-allowed"
+            whileHover={{ scale: 1.01 }}
+            whileTap={{ scale: 0.99 }}
           >
             {submitting ? "Submitting..." : "Process FIR →"}
-          </button>
+          </motion.button>
         </form>
       </motion.div>
 
