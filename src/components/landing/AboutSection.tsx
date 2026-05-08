@@ -32,11 +32,22 @@ export function AboutSection() {
             <div className="gold-divider my-8" style={{ width: "100%" }} />
 
             <div className="grid grid-cols-3 gap-8">
-              {stats.map((stat) => (
-                <div key={stat.label}>
-                  <div className="font-display text-3xl font-bold text-gold">{stat.number}</div>
+              {stats.map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                >
+                  <motion.div
+                    className="font-display text-3xl font-bold text-gold"
+                    whileHover={{ scale: 1.05 }}
+                  >
+                    {stat.number}
+                  </motion.div>
                   <div className="mt-1 text-[11px] uppercase tracking-[0.15em] text-text-muted">{stat.label}</div>
-                </div>
+                </motion.div>
               ))}
             </div>
           </motion.div>
@@ -48,7 +59,11 @@ export function AboutSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.15 }}
           >
-            <div className="card-scene overflow-hidden rounded-[4px] p-1">
+            <motion.div
+              className="glass-panel overflow-hidden rounded-[4px] p-1"
+              whileHover={{ scale: 1.02, rotate: 0.5 }}
+              transition={{ type: "spring", stiffness: 200 }}
+            >
               <img
                 src={sceneMockup}
                 alt="3D Scene Viewer Interface"
@@ -57,7 +72,7 @@ export function AboutSection() {
                 width={640}
                 height={512}
               />
-            </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

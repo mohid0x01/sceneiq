@@ -1,7 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { FileText, CheckCircle, Loader, TrendingUp, ArrowRight, AlertCircle } from "lucide-react";
+import { FileText, CheckCircle, Loader, TrendingUp, ArrowRight, AlertCircle, Eye, RotateCcw, StopCircle } from "lucide-react";
 import { useJobsRealtime } from "@/hooks/useJobRealtime";
+import { useJobToasts } from "@/hooks/useJobToasts";
+import { JobDetailsDrawer } from "@/components/dashboard/JobDetailsDrawer";
+import { useServerFn } from "@tanstack/react-start";
+import { cancelJob, retryJob, runMockPipeline } from "@/server/fir.functions";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/")({
   component: DashboardHome,
@@ -31,6 +37,33 @@ const statusLabels: Record<string, string> = {
 
 function DashboardHome() {
   const jobs = useJobsRealtime();
+  useJobToasts(jobs);
+
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const selectedJob = jobs.find(j => j.id === selectedJobId) || null;
+
+  const cancelJobFn = useServerFn(cancelJob);
+  const retryJobFn = useServerFn(retryJob);
+  const runPipelineFn = useServerFn(runMockPipeline);
+
+  const handleCancel = async (jobId: string) => {
+    try {
+      await cancelJobFn({ data: { jobId } });
+      toast.success("Pipeline cancelled");
+    } catch {
+      toast.error("Failed to cancel pipeline");
+    }
+  };
+
+  const handleRetry = async (jobId: string) => {
+    try {
+      await retryJobFn({ data: { jobId } });
+      toast("Pipeline reset — restarting...");
+      runPipelineFn({ data: { jobId } }).catch(console.error);
+    } catch {
+      toast.error("Failed to retry pipeline");
+    }
+  };
 
   const totalFirs = jobs.length;
   const completed = jobs.filter(j => j.status === "completed").length;
@@ -72,7 +105,7 @@ function DashboardHome() {
           <div className="flex flex-col items-center justify-center rounded-[4px] border border-border-subtle bg-card py-16">
             <AlertCircle className="h-8 w-8 text-text-muted" />
             <p className="mt-3 text-sm text-text-muted">No FIR records yet. Submit your first FIR to get started.</p>
-            <Link to="/dashboard/submit" className="mt-4 rounded-[4px] bg-gold px-6 py-2 text-[12px] font-semibold uppercase tracking-[0.1em] text-background">
+            <Link to="/dashboard/submit" className="mt-4 glass-button rounded-[6px] px-6 py-2 text-[12px] font-semibold uppercase tracking-[0.1em]">
               Submit FIR
             </Link>
           </div>
@@ -85,7 +118,7 @@ function DashboardHome() {
                   <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">District</th>
                   <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Submitted</th>
                   <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Status</th>
-                  <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Action</th>
+                  <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-[0.12em] text-text-muted">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -100,17 +133,35 @@ function DashboardHome() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      {job.status === "completed" ? (
-                        <Link to="/dashboard/viewer" search={{ jobId: job.id }} className="flex items-center gap-1 text-[12px] font-semibold uppercase tracking-[0.1em] text-gold hover:text-gold-light">
-                          View Scene <ArrowRight className="h-3 w-3" />
-                        </Link>
-                      ) : job.status === "failed" ? (
-                        <span className="text-[12px] text-destructive">Failed</span>
-                      ) : job.status !== "pending" ? (
-                        <Link to="/dashboard/processing" search={{ jobId: job.id }} className="flex items-center gap-1 text-[12px] font-semibold uppercase tracking-[0.1em] text-blue-400">
-                          <Loader className="h-3 w-3 animate-spin" /> Live
-                        </Link>
-                      ) : null}
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setSelectedJobId(job.id)}
+                          className="flex items-center gap-1 text-[12px] font-semibold uppercase tracking-[0.1em] text-text-muted hover:text-gold transition-colors"
+                          title="View Details"
+                        >
+                          <Eye className="h-3.5 w-3.5" /> Details
+                        </button>
+                        {job.status === "completed" && (
+                          <Link to="/dashboard/viewer" search={{ jobId: job.id }} className="flex items-center gap-1 text-[12px] font-semibold uppercase tracking-[0.1em] text-gold hover:text-gold-light">
+                            View <ArrowRight className="h-3 w-3" />
+                          </Link>
+                        )}
+                        {!["completed", "failed", "pending"].includes(job.status) && (
+                          <button onClick={() => handleCancel(job.id)} className="flex items-center gap-1 text-[11px] text-destructive/70 hover:text-destructive transition-colors" title="Cancel">
+                            <StopCircle className="h-3 w-3" />
+                          </button>
+                        )}
+                        {job.status === "failed" && (
+                          <button onClick={() => handleRetry(job.id)} className="flex items-center gap-1 text-[11px] text-gold/70 hover:text-gold transition-colors" title="Retry">
+                            <RotateCcw className="h-3 w-3" />
+                          </button>
+                        )}
+                        {!["completed", "failed", "pending"].includes(job.status) && (
+                          <Link to="/dashboard/processing" search={{ jobId: job.id }} className="flex items-center gap-1 text-[12px] font-semibold uppercase tracking-[0.1em] text-blue-400">
+                            <Loader className="h-3 w-3 animate-spin" /> Live
+                          </Link>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -119,6 +170,14 @@ function DashboardHome() {
           </div>
         )}
       </div>
+
+      <JobDetailsDrawer
+        job={selectedJob}
+        open={!!selectedJobId}
+        onClose={() => setSelectedJobId(null)}
+        onCancel={handleCancel}
+        onRetry={handleRetry}
+      />
     </div>
   );
 }

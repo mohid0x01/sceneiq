@@ -1,5 +1,32 @@
 # CHANGELOG — SCENEIQ FIR Scene Reconstruction Portal
 
+## [0.3.0] — 2026-05-08
+
+### Added
+- **Job Details Drawer**: Click any job row to open a full-width drawer showing the complete 5-stage pipeline timeline with status nodes, timestamps, metadata (job ID, model, processing time), and error messages for failed jobs.
+- **Realtime Toast Notifications**: Sonner toasts fire automatically when any `fir_job` advances pipeline stages, completes, or fails — instant feedback without watching the dashboard.
+- **Cancel Pipeline**: Running pipelines can be stopped via a cancel button (updates status to "failed" with "Cancelled by officer" message).
+- **Retry Pipeline**: Failed or cancelled jobs can be retried — resets status, clears old scene data, and re-runs the mock pipeline.
+- **Glassmorphism Button System**: All buttons across the app (landing, login, dashboard, submit) now use glass-water-effect morphism with backdrop blur, gradient overlays, and glow shadows. Three variants: `glass-button`, `glass-button-primary`, `glass-button-destructive`.
+- **Animated Icons on Hover**: All icons across landing page (navbar, hero, features, how-it-works, footer) animate on hover with scale, rotation, and glow effects via `icon-hover`, `icon-glow-hover`, and `icon-float` utility classes.
+- **3D Floating Particles**: Hero section now has animated floating gold particles and pulsing radial glow.
+- **Staggered Entry Animations**: Hero text, buttons, and labels animate in sequence with motion.div stagger delays.
+- **Glass Panel Component Class**: New `glass-panel` utility for frosted glass card effects with backdrop blur.
+- **Footer Social Icons**: Added animated GitHub, Mail, and External Link icons with hover rotation effects.
+- **Mobile Navbar Menu**: Hamburger menu for mobile navigation with glass panel dropdown.
+
+### Changed
+- All landing page sections use framer-motion `whileHover` for interactive icon animations.
+- Feature cards use `glass-panel` instead of `card-scene` for consistency.
+- Navbar uses glass panel background instead of solid bg.
+- About section image container uses glass panel.
+- Dashboard table rows now show Details, Cancel, Retry action buttons inline.
+
+### Database
+- Added delete policies on `scene_entities` and `scene_events` (officers can delete data for their own jobs, needed for retry).
+
+---
+
 ## [0.2.0] — 2026-05-07
 
 ### Added
