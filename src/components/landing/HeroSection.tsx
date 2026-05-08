@@ -20,8 +20,31 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
 
-      {/* Radial gold glow */}
-      <div className="absolute right-[20%] top-[40%] h-[500px] w-[500px] rounded-full bg-gold/5 blur-[120px]" />
+      {/* Animated radial glow */}
+      <motion.div
+        className="absolute right-[20%] top-[40%] h-[500px] w-[500px] rounded-full bg-gold/5 blur-[120px]"
+        animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
+        transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+      />
+
+      {/* Floating particles */}
+      {[...Array(5)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full bg-gold/20"
+          style={{
+            width: 3 + i * 2,
+            height: 3 + i * 2,
+            left: `${20 + i * 12}%`,
+            top: `${30 + i * 8}%`,
+          }}
+          animate={{
+            y: [0, -30, 0],
+            opacity: [0.2, 0.6, 0.2],
+          }}
+          transition={{ repeat: Infinity, duration: 4 + i, ease: "easeInOut", delay: i * 0.5 }}
+        />
+      ))}
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-20">
         <motion.div
@@ -30,34 +53,70 @@ export function HeroSection() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         >
-          <p className="label-uppercase text-[11px] tracking-[0.2em]">
+          <motion.p
+            className="label-uppercase text-[11px] tracking-[0.2em]"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2 }}
+          >
             Powered by AI · For Pakistan Law Enforcement
-          </p>
+          </motion.p>
 
           <GoldDivider />
 
-          <h1 className="font-display text-3xl font-bold leading-[1.1] text-text-primary md:text-5xl lg:text-[64px]">
+          <motion.h1
+            className="font-display text-3xl font-bold leading-[1.1] text-text-primary md:text-5xl lg:text-[64px]"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.7 }}
+          >
             We Turn Unstructured FIR Text Into Visual Crime Reconstructions
-          </h1>
+          </motion.h1>
 
-          <p className="mt-6 max-w-[480px] text-lg leading-relaxed text-text-secondary">
+          <motion.p
+            className="mt-6 max-w-[480px] text-lg leading-relaxed text-text-secondary"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
             Upload any FIR narrative. Our AI extracts every actor, location, and event — and renders a 3D animated scene reconstruction in under 30 seconds.
-          </p>
+          </motion.p>
 
-          <div className="mt-10 flex gap-4">
+          <motion.div
+            className="mt-10 flex gap-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+          >
             <Link to="/dashboard">
-              <button className="flex items-center gap-2 rounded-[6px] bg-gold px-8 py-3 text-[13px] font-semibold uppercase tracking-[0.1em] text-background shadow-[0_2px_12px_rgba(201,168,76,0.25)] transition-all duration-200 hover:bg-gold-light hover:scale-[1.01]">
-                Access Portal <ArrowRight className="h-4 w-4" />
-              </button>
+              <motion.button
+                className="glass-button-primary group flex items-center gap-2 rounded-[6px] px-8 py-3 text-[13px] font-semibold uppercase tracking-[0.1em]"
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                Access Portal
+                <motion.span className="inline-block" whileHover={{ x: 4 }} transition={{ type: "spring" }}>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </motion.span>
+              </motion.button>
             </Link>
-            <button className="flex items-center gap-2 rounded-[6px] border border-gold/50 px-8 py-3 text-[13px] font-semibold uppercase tracking-[0.1em] text-gold transition-all duration-200 hover:border-gold hover:bg-gold/10">
-              <Play className="h-4 w-4" /> Watch Demo
-            </button>
-          </div>
+            <motion.button
+              className="glass-button group flex items-center gap-2 rounded-[6px] px-8 py-3 text-[13px] font-semibold uppercase tracking-[0.1em]"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Play className="h-4 w-4 transition-transform group-hover:scale-110" /> Watch Demo
+            </motion.button>
+          </motion.div>
 
-          <p className="mt-8 text-[12px] text-text-muted">
+          <motion.p
+            className="mt-8 text-[12px] text-text-muted"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.9 }}
+          >
             Developed for Shah Abdul Latif University · Institute of Computer Science
-          </p>
+          </motion.p>
         </motion.div>
       </div>
 
