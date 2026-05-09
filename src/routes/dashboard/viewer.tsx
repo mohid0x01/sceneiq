@@ -26,6 +26,9 @@ import type { Tables } from "@/integrations/supabase/types";
 const Scene3DCanvas = lazy(() =>
   import("@/components/viewer/Scene3DCanvas").then((m) => ({ default: m.Scene3DCanvas }))
 );
+const CrimeMap = lazy(() =>
+  import("@/components/CrimeMap").then((m) => ({ default: m.CrimeMap }))
+);
 
 const searchSchema = z.object({ jobId: z.string().optional() });
 
