@@ -80,21 +80,21 @@ function SceneViewer() {
           setCurrentEvent(0);
         }
       });
-    // Also fetch FIR text via the job's fir_record_id
+    // Also fetch FIR text via the job's fir_id
     supabase
       .from("fir_jobs")
-      .select("fir_record_id")
+      .select("fir_id")
       .eq("id", jobId)
       .single()
       .then(({ data }) => {
-        const recId = data?.fir_record_id;
+        const recId = data?.fir_id;
         if (recId) {
           supabase
             .from("fir_records")
-            .select("fir_text")
+            .select("raw_narrative")
             .eq("id", recId)
             .single()
-            .then(({ data: rec }) => { if (rec?.fir_text) setFirText(rec.fir_text); });
+            .then(({ data: rec }) => { if (rec?.raw_narrative) setFirText(rec.raw_narrative); });
         }
       });
   }, [jobId, job?.status, setTotalEvents, setCurrentEvent]);
