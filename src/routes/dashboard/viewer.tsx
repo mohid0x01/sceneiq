@@ -45,6 +45,7 @@ function SceneViewer() {
   const job = useJobRealtime(jobId || null);
   const [entities, setEntities] = useState<SceneEntity[]>([]);
   const [events, setEvents] = useState<SceneEvent[]>([]);
+  const [firText, setFirText] = useState<string>("");
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
 
