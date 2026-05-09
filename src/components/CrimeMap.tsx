@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Popup, Circle } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import type { CrimeLocation } from "@/lib/geocode";
+
+export { geocodeFirText, type CrimeLocation } from "@/lib/geocode";
 
 // Fix Leaflet's default icon paths in bundlers
 const goldIcon = L.divIcon({
