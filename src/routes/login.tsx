@@ -46,7 +46,14 @@ function LoginPage() {
           },
         });
         if (signUpError) throw signUpError;
-        setMessage("Check your email for a verification link, then sign in.");
+        // Auto-confirm enabled — sign in immediately
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) {
+          setMessage("Account created. Please sign in.");
+          setIsSignUp(false);
+        } else {
+          navigate({ to: "/dashboard" });
+        }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
@@ -57,6 +64,46 @@ function LoginPage() {
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Authentication failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+    const demoEmail = "officer@sceneiq.gov.pk";
+    const demoPass = "Officer@2026";
+    try {
+      // Try sign in first
+      let { error: signInError } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPass,
+      });
+      if (signInError) {
+        // Account doesn't exist — create it
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: demoEmail,
+          password: demoPass,
+          options: {
+            data: {
+              full_name: "ASI Demo Officer",
+              badge_number: "BADGE-DEMO-2026",
+              district: "Khairpur",
+            },
+          },
+        });
+        if (signUpError) throw signUpError;
+        ({ error: signInError } = await supabase.auth.signInWithPassword({
+          email: demoEmail,
+          password: demoPass,
+        }));
+        if (signInError) throw signInError;
+      }
+      navigate({ to: "/dashboard" });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Demo login failed");
     } finally {
       setLoading(false);
     }
