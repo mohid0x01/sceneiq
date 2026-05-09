@@ -29,6 +29,7 @@ const Scene3DCanvas = lazy(() =>
 const CrimeMap = lazy(() =>
   import("@/components/CrimeMap").then((m) => ({ default: m.CrimeMap }))
 );
+import { geocodeFirText } from "@/components/CrimeMap";
 
 const searchSchema = z.object({ jobId: z.string().optional() });
 
