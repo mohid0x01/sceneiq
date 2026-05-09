@@ -80,6 +80,23 @@ function SceneViewer() {
           setCurrentEvent(0);
         }
       });
+    // Also fetch FIR text via the job's fir_record_id
+    supabase
+      .from("fir_jobs")
+      .select("fir_record_id")
+      .eq("id", jobId)
+      .single()
+      .then(({ data }) => {
+        const recId = data?.fir_record_id;
+        if (recId) {
+          supabase
+            .from("fir_records")
+            .select("fir_text")
+            .eq("id", recId)
+            .single()
+            .then(({ data: rec }) => { if (rec?.fir_text) setFirText(rec.fir_text); });
+        }
+      });
   }, [jobId, job?.status, setTotalEvents, setCurrentEvent]);
 
   // Auto-play
