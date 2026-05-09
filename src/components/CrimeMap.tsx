@@ -20,12 +20,8 @@ const goldIcon = L.divIcon({
   iconAnchor: [14, 14],
 });
 
-export interface CrimeLocation {
-  label: string;
-  lat: number;
-  lng: number;
-  description?: string;
-}
+// CrimeLocation type re-exported from @/lib/geocode at top of file
+
 
 interface CrimeMapProps {
   locations: CrimeLocation[];
