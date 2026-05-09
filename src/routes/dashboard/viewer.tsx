@@ -193,6 +193,25 @@ function SceneViewer() {
                 </div>
               ))}
             </div>
+
+            <h3 className="label-uppercase mb-3 mt-6 flex items-center gap-2">
+              <MapPin className="h-3 w-3" /> Real-World Map
+            </h3>
+            <Suspense fallback={<div className="h-[260px] animate-pulse rounded-[6px] bg-surface" />}>
+              <CrimeMap
+                height="260px"
+                locations={(() => {
+                  const labels = locationEntities.map((l) => l.label);
+                  // dynamic geocode (lightweight)
+                  // eslint-disable-next-line @typescript-eslint/no-require-imports
+                  const { geocodeFirText } = require("@/components/CrimeMap") as typeof import("@/components/CrimeMap");
+                  return geocodeFirText(firText, labels);
+                })()}
+              />
+            </Suspense>
+            <p className="mt-2 text-[10px] text-text-muted">
+              Locations geocoded from the FIR narrative onto OpenStreetMap.
+            </p>
           </div>
         )}
 
