@@ -30,20 +30,28 @@ function LandingPage() {
   );
 }
 
-const provinces = ["Sindh Police", "Punjab Police", "KPK Police", "Balochistan Police"];
+import { POLICE_PROVINCES, PoliceShield } from "@/components/PoliceShield";
 
 function PoliceStrip() {
   return (
-    <div className="border-y border-subtle bg-[oklch(0.09_0.005_60)] py-6">
-      <div className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-4 px-6 text-center">
-        <span className="text-[12px] text-text-muted">Processes FIR text from</span>
-        {provinces.map((p, i) => (
-          <span key={p} className="flex items-center gap-4">
-            {i > 0 && <span className="h-3 w-[1px] bg-gold/30" />}
-            <span className="text-[12px] font-medium uppercase tracking-[0.1em] text-text-secondary">{p}</span>
-          </span>
-        ))}
-        <span className="text-[12px] text-text-muted">and all provincial systems</span>
+    <div className="relative z-10 border-y border-subtle bg-[oklch(0.06_0.005_60)/0.7] py-10 backdrop-blur-md">
+      <div className="mx-auto max-w-5xl px-6">
+        <p className="text-center text-[11px] font-semibold uppercase tracking-[0.25em] text-gold/80">
+          Processes FIR text from
+        </p>
+        <div className="mt-6 flex flex-wrap items-end justify-center gap-x-10 gap-y-6">
+          {POLICE_PROVINCES.map((p) => (
+            <div key={p.key} className="flex flex-col items-center gap-2">
+              <PoliceShield province={p.key} size={56} />
+              <span className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-secondary">
+                {p.label}
+              </span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-6 text-center text-[11px] text-text-muted">
+          and all provincial systems
+        </p>
       </div>
     </div>
   );

@@ -9,6 +9,8 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { TwinklingStars } from "@/components/effects/TwinklingStars";
+import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
   return (
@@ -113,7 +115,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <div className="relative min-h-screen bg-[#050505]">
+        <TwinklingStars />
+        <div className="relative z-10">
+          <Outlet />
+        </div>
+        <Toaster />
+      </div>
     </QueryClientProvider>
   );
 }

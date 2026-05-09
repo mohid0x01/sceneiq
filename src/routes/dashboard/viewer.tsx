@@ -26,6 +26,10 @@ import type { Tables } from "@/integrations/supabase/types";
 const Scene3DCanvas = lazy(() =>
   import("@/components/viewer/Scene3DCanvas").then((m) => ({ default: m.Scene3DCanvas }))
 );
+const CrimeMap = lazy(() =>
+  import("@/components/CrimeMap").then((m) => ({ default: m.CrimeMap }))
+);
+import { geocodeFirText } from "@/components/CrimeMap";
 
 const searchSchema = z.object({ jobId: z.string().optional() });
 
@@ -42,6 +46,7 @@ function SceneViewer() {
   const job = useJobRealtime(jobId || null);
   const [entities, setEntities] = useState<SceneEntity[]>([]);
   const [events, setEvents] = useState<SceneEvent[]>([]);
+  const [firText, setFirText] = useState<string>("");
   const [leftOpen, setLeftOpen] = useState(true);
   const [rightOpen, setRightOpen] = useState(true);
 
@@ -74,6 +79,23 @@ function SceneViewer() {
           setEvents(data);
           setTotalEvents(data.length);
           setCurrentEvent(0);
+        }
+      });
+    // Also fetch FIR text via the job's fir_id
+    supabase
+      .from("fir_jobs")
+      .select("fir_id")
+      .eq("id", jobId)
+      .single()
+      .then(({ data }) => {
+        const recId = data?.fir_id;
+        if (recId) {
+          supabase
+            .from("fir_records")
+            .select("raw_narrative")
+            .eq("id", recId)
+            .single()
+            .then(({ data: rec }) => { if (rec?.raw_narrative) setFirText(rec.raw_narrative); });
         }
       });
   }, [jobId, job?.status, setTotalEvents, setCurrentEvent]);
@@ -172,6 +194,25 @@ function SceneViewer() {
                 </div>
               ))}
             </div>
+
+            <h3 className="label-uppercase mb-3 mt-6 flex items-center gap-2">
+              <MapPin className="h-3 w-3" /> Real-World Map
+            </h3>
+            <Suspense fallback={<div className="h-[260px] animate-pulse rounded-[6px] bg-surface" />}>
+              <CrimeMap
+                height="260px"
+                locations={(() => {
+                  const labels = locationEntities.map((l) => l.label);
+                  // dynamic geocode (lightweight)
+                  // eslint-disable-next-line @typescript-eslint/no-require-imports
+                  const { geocodeFirText } = require("@/components/CrimeMap") as typeof import("@/components/CrimeMap");
+                  return geocodeFirText(firText, labels);
+                })()}
+              />
+            </Suspense>
+            <p className="mt-2 text-[10px] text-text-muted">
+              Locations geocoded from the FIR narrative onto OpenStreetMap.
+            </p>
           </div>
         )}
 

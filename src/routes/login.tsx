@@ -46,7 +46,14 @@ function LoginPage() {
           },
         });
         if (signUpError) throw signUpError;
-        setMessage("Check your email for a verification link, then sign in.");
+        // Auto-confirm enabled — sign in immediately
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) {
+          setMessage("Account created. Please sign in.");
+          setIsSignUp(false);
+        } else {
+          navigate({ to: "/dashboard" });
+        }
       } else {
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
@@ -57,6 +64,46 @@ function LoginPage() {
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Authentication failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async () => {
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+    const demoEmail = "officer@sceneiq.gov.pk";
+    const demoPass = "Officer@2026";
+    try {
+      // Try sign in first
+      let { error: signInError } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPass,
+      });
+      if (signInError) {
+        // Account doesn't exist — create it
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: demoEmail,
+          password: demoPass,
+          options: {
+            data: {
+              full_name: "ASI Demo Officer",
+              badge_number: "BADGE-DEMO-2026",
+              district: "Khairpur",
+            },
+          },
+        });
+        if (signUpError) throw signUpError;
+        ({ error: signInError } = await supabase.auth.signInWithPassword({
+          email: demoEmail,
+          password: demoPass,
+        }));
+        if (signInError) throw signInError;
+      }
+      navigate({ to: "/dashboard" });
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Demo login failed");
     } finally {
       setLoading(false);
     }
@@ -75,7 +122,7 @@ function LoginPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="gold-top-border rounded-[4px] border border-border-accent bg-card p-8 shadow-[0_24px_80px_rgba(0,0,0,0.9)]">
+        <div className="glass-card gold-top-border rounded-[8px] p-8">
           <div className="flex justify-center">
             <SceneIQLogo size="large" />
           </div>
@@ -86,6 +133,13 @@ function LoginPage() {
           <p className="mt-2 text-center text-[13px] text-destructive/80">
             Restricted system. Authorized personnel only.
           </p>
+
+          {/* Demo credentials hint */}
+          <div className="mt-4 rounded-[6px] border border-gold/20 bg-gold/5 px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold">Demo Credentials</p>
+            <p className="mt-1 font-mono text-[11px] text-text-secondary">officer@sceneiq.gov.pk</p>
+            <p className="font-mono text-[11px] text-text-secondary">Officer@2026</p>
+          </div>
 
           {error && (
             <div className="mt-4 rounded-[4px] border border-destructive/30 bg-destructive/10 px-4 py-2 text-[12px] text-destructive">
@@ -98,7 +152,7 @@ function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-5">
             {isSignUp && (
               <>
                 <div>
@@ -108,7 +162,7 @@ function LoginPage() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. ASI Muhammad Akram"
-                    className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+                    className="glass-input mt-2 w-full rounded-[6px] px-4 py-3 text-sm placeholder:text-text-muted"
                   />
                 </div>
                 <div>
@@ -118,7 +172,7 @@ function LoginPage() {
                     value={badgeNumber}
                     onChange={(e) => setBadgeNumber(e.target.value)}
                     placeholder="e.g. BADGE-KHP-2024"
-                    className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 font-mono text-sm text-gold placeholder:text-text-muted focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+                    className="glass-input mt-2 w-full rounded-[6px] px-4 py-3 font-mono text-sm text-gold placeholder:text-text-muted"
                   />
                 </div>
               </>
@@ -131,9 +185,9 @@ function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder="officer@example.gov.pk"
                 required
-                className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 text-sm text-text-primary placeholder:text-text-muted focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+                className="glass-input mt-2 w-full rounded-[6px] px-4 py-3 text-sm placeholder:text-text-muted"
               />
             </div>
 
@@ -148,7 +202,7 @@ function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter password"
                   required
-                  className="w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 pr-10 text-sm text-text-primary placeholder:text-text-muted focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+                  className="glass-input w-full rounded-[6px] px-4 py-3 pr-10 text-sm placeholder:text-text-muted"
                 />
                 <button
                   type="button"
@@ -166,6 +220,15 @@ function LoginPage() {
               className="glass-button-primary w-full rounded-[6px] py-3 text-[13px] font-semibold uppercase tracking-[0.1em] disabled:opacity-50"
             >
               {loading ? "Processing..." : isSignUp ? "Create Account" : "Sign In"}
+            </button>
+
+            <button
+              type="button"
+              onClick={handleDemoLogin}
+              disabled={loading}
+              className="glass-button w-full rounded-[6px] py-3 text-[12px] font-semibold uppercase tracking-[0.1em] disabled:opacity-50"
+            >
+              Use Demo Officer Account
             </button>
           </form>
 

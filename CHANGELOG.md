@@ -1,6 +1,25 @@
 # CHANGELOG — SCENEIQ FIR Scene Reconstruction Portal
 
+## [0.4.0] — 2026-05-09
+
+### Added
+- **WebGL-style Twinkling Stars Background**: Fullscreen fixed canvas (`TwinklingStars`) behind every page with gold + cool-blue stars and soft radial vignette. Mounted globally in `__root.tsx`.
+- **Real OpenStreetMap Crime Map**: New `CrimeMap` component (Leaflet + react-leaflet, no API key) inside the 3D viewer. Locations are geocoded from FIR text via `@/lib/geocode` covering Khairpur, Sukkur, Karachi, Lahore, Peshawar, Quetta and 11+ Pakistani districts, shown as pulsing gold markers on dark-themed tiles.
+- **Provincial Police Shields**: New `PoliceShield` SVG component renders Sindh, Punjab, KPK and Balochistan badges above the "Processes FIR text from" strip on the landing page (crescent + star, province-color gradient, hover tilt).
+- **Demo Officer Login**: One-click "Use Demo Officer Account" button on `/login` provisions and signs in `officer@sceneiq.gov.pk / Officer@2026` (auto-confirm enabled).
+- **Glass Form Controls**: New `.glass-input` and `.glass-card` utility classes applied across login + dashboard modules.
+- **SCENEIQ Emblem**: Official Pakistan Police F.I.R. Reconstruction emblem now used in `SceneIQLogo` (navbar, login, dashboard).
+
+### Changed
+- **Darker Base Theme**: Background dropped to near-pure-black (`oklch(0.04 …)`) to maximize twinkling-star contrast.
+- **Auth**: Email auto-confirm enabled — sign-up immediately signs the officer in.
+- **Leaflet Dark Theme**: Tile inversion + custom popup/attribution/zoom-control styling matching gold-on-black palette.
+
+### Fixed
+- Landing page police strip layout now stacks shields above province labels.
+
 ## [0.3.0] — 2026-05-08
+
 
 ### Added
 - **Job Details Drawer**: Click any job row to open a full-width drawer showing the complete 5-stage pipeline timeline with status nodes, timestamps, metadata (job ID, model, processing time), and error messages for failed jobs.
