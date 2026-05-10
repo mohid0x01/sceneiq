@@ -1,8 +1,14 @@
 import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight, Play, Sparkles, Shield, Zap, Globe } from "lucide-react";
 import { GoldDivider } from "@/components/GoldDivider";
 import heroImage from "@/assets/hero-officer.jpg";
+
+const stats = [
+  { icon: Zap, label: "Avg. Render", value: "< 30s" },
+  { icon: Shield, label: "Provinces", value: "4" },
+  { icon: Globe, label: "Languages", value: "EN · UR" },
+];
 
 export function HeroSection() {
   return (
@@ -20,61 +26,77 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
 
+      {/* Aurora mesh */}
+      <div className="aurora-bg" />
+
+      {/* Grid overlay */}
+      <div className="grid-overlay" />
+
+      {/* Conic rotating ring */}
+      <div className="absolute right-[15%] top-[30%] h-[600px] w-[600px] rounded-full conic-ring opacity-40" />
+
       {/* Animated radial glow */}
       <motion.div
-        className="absolute right-[20%] top-[40%] h-[500px] w-[500px] rounded-full bg-gold/5 blur-[120px]"
-        animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.8, 0.5] }}
-        transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+        className="absolute right-[20%] top-[40%] h-[500px] w-[500px] rounded-full bg-gold/8 blur-[120px]"
+        animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.85, 0.4] }}
+        transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
       />
 
       {/* Floating particles */}
-      {[...Array(5)].map((_, i) => (
+      {[...Array(12)].map((_, i) => (
         <motion.div
           key={i}
-          className="absolute rounded-full bg-gold/20"
+          className="absolute rounded-full bg-gold/30"
           style={{
-            width: 3 + i * 2,
-            height: 3 + i * 2,
-            left: `${20 + i * 12}%`,
-            top: `${30 + i * 8}%`,
+            width: 2 + (i % 4),
+            height: 2 + (i % 4),
+            left: `${(i * 8 + 10) % 90}%`,
+            top: `${(i * 13 + 15) % 85}%`,
           }}
           animate={{
-            y: [0, -30, 0],
-            opacity: [0.2, 0.6, 0.2],
+            y: [0, -40, 0],
+            opacity: [0.15, 0.7, 0.15],
           }}
-          transition={{ repeat: Infinity, duration: 4 + i, ease: "easeInOut", delay: i * 0.5 }}
+          transition={{ repeat: Infinity, duration: 4 + (i % 4), ease: "easeInOut", delay: i * 0.4 }}
         />
       ))}
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-20">
         <motion.div
-          className="max-w-full px-2 md:max-w-[55%] md:px-0"
+          className="max-w-full px-2 md:max-w-[60%] md:px-0"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         >
-          <motion.p
-            className="label-uppercase text-[11px] tracking-[0.2em]"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
+          {/* Shine badge */}
+          <motion.div
+            className="shine-badge inline-flex items-center gap-2 rounded-full px-4 py-1.5"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
           >
-            Powered by AI · For Pakistan Law Enforcement
-          </motion.p>
+            <Sparkles className="h-3.5 w-3.5 text-gold" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-gold-light">
+              Powered by AI · For Pakistan Law Enforcement
+            </span>
+          </motion.div>
 
           <GoldDivider />
 
           <motion.h1
-            className="font-display text-3xl font-bold leading-[1.1] text-text-primary md:text-5xl lg:text-[64px]"
+            className="font-display text-4xl font-bold leading-[1.05] md:text-6xl lg:text-[72px]"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.7 }}
           >
-            We Turn Unstructured FIR Text Into Visual Crime Reconstructions
+            <span className="text-text-primary">We Turn Unstructured </span>
+            <span className="text-gradient-gold">FIR Text</span>
+            <span className="text-text-primary"> Into Visual </span>
+            <span className="text-gradient-gold">Crime Reconstructions</span>
           </motion.h1>
 
           <motion.p
-            className="mt-6 max-w-[480px] text-lg leading-relaxed text-text-secondary"
+            className="mt-6 max-w-[520px] text-lg leading-relaxed text-text-secondary"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
@@ -83,7 +105,7 @@ export function HeroSection() {
           </motion.p>
 
           <motion.div
-            className="mt-10 flex gap-4"
+            className="mt-10 flex flex-wrap gap-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.7 }}
@@ -95,9 +117,7 @@ export function HeroSection() {
                 whileTap={{ scale: 0.98 }}
               >
                 Access Portal
-                <motion.span className="inline-block" whileHover={{ x: 4 }} transition={{ type: "spring" }}>
-                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </motion.span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </motion.button>
             </Link>
             <motion.button
@@ -109,11 +129,32 @@ export function HeroSection() {
             </motion.button>
           </motion.div>
 
+          {/* Stats row */}
+          <motion.div
+            className="mt-12 grid max-w-md grid-cols-3 gap-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.85 }}
+          >
+            {stats.map((s, i) => (
+              <motion.div
+                key={s.label}
+                className="glass-card rounded-lg p-4"
+                whileHover={{ y: -4, scale: 1.03 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <s.icon className="mb-2 h-4 w-4 text-gold icon-float" style={{ animationDelay: `${i * 0.4}s` }} />
+                <div className="font-display text-xl font-bold text-text-primary">{s.value}</div>
+                <div className="text-[9px] uppercase tracking-[0.15em] text-text-muted">{s.label}</div>
+              </motion.div>
+            ))}
+          </motion.div>
+
           <motion.p
             className="mt-8 text-[12px] text-text-muted"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.9 }}
+            transition={{ delay: 1 }}
           >
             Developed for Shah Abdul Latif University · Institute of Computer Science
           </motion.p>
