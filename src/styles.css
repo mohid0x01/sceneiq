@@ -324,6 +324,94 @@
     filter: drop-shadow(0 0 12px oklch(0.72 0.12 85 / 50%));
     transform: scale(1.1);
   }
+
+  /* Aurora mesh gradient background */
+  .aurora-bg {
+    position: absolute;
+    inset: -20%;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 30%, oklch(0.72 0.12 85 / 18%), transparent 60%),
+      radial-gradient(ellipse 50% 40% at 80% 20%, oklch(0.55 0.18 280 / 14%), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 60% 80%, oklch(0.5 0.18 25 / 12%), transparent 65%),
+      radial-gradient(ellipse 40% 40% at 10% 90%, oklch(0.6 0.15 180 / 10%), transparent 60%);
+    filter: blur(40px);
+    animation: auroraDrift 18s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+
+  /* Animated grid overlay */
+  .grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(oklch(0.72 0.12 85 / 6%) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(0.72 0.12 85 / 6%) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 80%);
+    pointer-events: none;
+  }
+
+  /* Conic rotating ring */
+  .conic-ring {
+    background: conic-gradient(from 0deg,
+      transparent 0deg,
+      oklch(0.72 0.12 85 / 35%) 60deg,
+      transparent 120deg,
+      oklch(0.55 0.18 280 / 25%) 200deg,
+      transparent 260deg,
+      oklch(0.72 0.12 85 / 30%) 320deg,
+      transparent 360deg);
+    animation: rotateGlow 22s linear infinite;
+    filter: blur(30px);
+  }
+
+  /* Gradient gold heading text */
+  .text-gradient-gold {
+    background: linear-gradient(135deg,
+      oklch(0.95 0.015 75) 0%,
+      oklch(0.88 0.10 85) 35%,
+      oklch(0.72 0.12 85) 70%,
+      oklch(0.95 0.015 75) 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: gradientShift 8s ease infinite;
+  }
+
+  /* Shiny badge */
+  .shine-badge {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, oklch(0.18 0.01 60 / 80%), oklch(0.12 0.005 60 / 70%));
+    border: 1px solid oklch(0.72 0.12 85 / 30%);
+    backdrop-filter: blur(10px);
+  }
+  .shine-badge::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, oklch(0.95 0.05 85 / 30%) 50%, transparent 70%);
+    transform: translateX(-100%);
+    animation: shineSweep 3.5s ease-in-out infinite;
+  }
+}
+
+@keyframes auroraDrift {
+  0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
+  50%  { transform: translate(3%, -2%) rotate(8deg) scale(1.05); }
+  100% { transform: translate(-2%, 3%) rotate(-6deg) scale(1.08); }
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
+}
+
+@keyframes shineSweep {
+  0%   { transform: translateX(-100%); }
+  60%  { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
 }
 
 @keyframes goldPulse {
