@@ -115,8 +115,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="relative min-h-screen bg-[#050505]">
-        <TwinklingStars />
+      <div className="relative min-h-screen bg-black">
+        <TwinklingStars density={200} />
+        <div className="pointer-events-none fixed inset-0 z-[1] global-grid" aria-hidden="true" />
+        <div className="pointer-events-none fixed inset-0 z-[2] global-vignette" aria-hidden="true" />
         <div className="relative z-10">
           <Outlet />
         </div>
