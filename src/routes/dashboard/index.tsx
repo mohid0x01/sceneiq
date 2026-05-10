@@ -6,7 +6,7 @@ import { useJobsRealtime } from "@/hooks/useJobRealtime";
 import { useJobToasts } from "@/hooks/useJobToasts";
 import { JobDetailsDrawer } from "@/components/dashboard/JobDetailsDrawer";
 import { useServerFn } from "@tanstack/react-start";
-import { cancelJob, retryJob, runMockPipeline } from "@/server/fir.functions";
+import { cancelJob, retryJob, runMockPipeline } from "@/lib/fir.functions";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/dashboard/")({
