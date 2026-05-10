@@ -78,7 +78,7 @@
 
 :root {
   --radius: 4px;
-  --background: oklch(0.04 0.005 60);
+  --background: oklch(0 0 0);
   --foreground: oklch(0.95 0.015 75);
   --card: oklch(0.13 0.005 60);
   --card-foreground: oklch(0.95 0.015 75);
@@ -205,49 +205,116 @@
     box-shadow: 0 0 40px oklch(0.72 0.12 85 / 10%), 0 0 80px oklch(0.72 0.12 85 / 5%);
   }
 
-  /* Glassmorphism Buttons */
+  /* Global grid + vignette overlays */
+  .global-grid {
+    background-image:
+      linear-gradient(rgba(201,168,76,0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,168,76,0.045) 1px, transparent 1px);
+    background-size: 56px 56px;
+    background-position: -1px -1px;
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, black 35%, transparent 95%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 40%, black 35%, transparent 95%);
+  }
+  .global-vignette {
+    background: radial-gradient(ellipse 60% 50% at 50% 30%, rgba(201,168,76,0.04), transparent 70%),
+      radial-gradient(ellipse 100% 100% at 50% 100%, rgba(0,0,0,0.6), transparent 60%);
+  }
+
+  /* Glassmorphism Buttons — water ripple effect */
+  .glass-button,
+  .glass-button-primary,
+  .glass-button-destructive {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .glass-button::before,
+  .glass-button-primary::before,
+  .glass-button-destructive::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.18) 48%,
+      rgba(255, 220, 140, 0.28) 50%,
+      rgba(255, 255, 255, 0.18) 52%,
+      transparent 70%);
+    transform: translateX(-120%);
+    transition: transform 900ms cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .glass-button:hover::before,
+  .glass-button-primary:hover::before,
+  .glass-button-destructive:hover::before {
+    transform: translateX(120%);
+  }
+  .glass-button::after,
+  .glass-button-primary::after,
+  .glass-button-destructive::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -10%;
+    right: -10%;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18), transparent);
+    border-radius: 50%;
+    filter: blur(8px);
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  .glass-button > *,
+  .glass-button-primary > *,
+  .glass-button-destructive > * {
+    position: relative;
+    z-index: 2;
+  }
+
   .glass-button {
     background: linear-gradient(135deg, oklch(0.72 0.12 85 / 15%), oklch(0.72 0.12 85 / 8%));
     border: 1px solid oklch(0.72 0.12 85 / 30%);
     color: var(--color-gold);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
     transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 16px oklch(0 0 0 / 30%), inset 0 1px 0 oklch(1 0 0 / 6%);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 -1px 0 rgba(0,0,0,0.3);
   }
   .glass-button:hover {
-    background: linear-gradient(135deg, oklch(0.72 0.12 85 / 28%), oklch(0.72 0.12 85 / 15%));
-    border-color: oklch(0.72 0.12 85 / 50%);
-    box-shadow: 0 8px 32px oklch(0.72 0.12 85 / 15%), inset 0 1px 0 oklch(1 0 0 / 10%);
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, oklch(0.72 0.12 85 / 30%), oklch(0.72 0.12 85 / 15%));
+    border-color: oklch(0.72 0.12 85 / 55%);
+    box-shadow: 0 12px 36px oklch(0.72 0.12 85 / 22%), inset 0 1px 0 rgba(255,255,255,0.14);
+    transform: translateY(-2px);
   }
 
   .glass-button-primary {
-    background: linear-gradient(135deg, oklch(0.72 0.12 85 / 85%), oklch(0.62 0.12 85 / 75%));
-    border: 1px solid oklch(0.82 0.11 85 / 40%);
+    background: linear-gradient(135deg, oklch(0.78 0.13 85 / 90%), oklch(0.62 0.12 85 / 80%));
+    border: 1px solid oklch(0.85 0.10 85 / 50%);
     color: oklch(0.08 0.005 60);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px) saturate(160%);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
     transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 20px oklch(0.72 0.12 85 / 25%), inset 0 1px 0 oklch(1 0 0 / 15%);
+    box-shadow: 0 6px 24px oklch(0.72 0.12 85 / 30%), inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -2px 6px rgba(120,80,0,0.25);
   }
   .glass-button-primary:hover {
-    background: linear-gradient(135deg, oklch(0.82 0.11 85 / 90%), oklch(0.72 0.12 85 / 80%));
-    box-shadow: 0 8px 40px oklch(0.72 0.12 85 / 35%), inset 0 1px 0 oklch(1 0 0 / 20%);
+    background: linear-gradient(135deg, oklch(0.85 0.11 85 / 95%), oklch(0.72 0.12 85 / 85%));
+    box-shadow: 0 12px 44px oklch(0.72 0.12 85 / 40%), inset 0 1px 0 rgba(255,255,255,0.35);
     transform: translateY(-2px) scale(1.02);
   }
 
   .glass-button-destructive {
-    background: linear-gradient(135deg, oklch(0.5 0.2 25 / 15%), oklch(0.5 0.2 25 / 8%));
-    border: 1px solid oklch(0.5 0.2 25 / 30%);
-    color: oklch(0.65 0.2 25);
-    backdrop-filter: blur(12px);
+    background: linear-gradient(135deg, oklch(0.5 0.2 25 / 18%), oklch(0.5 0.2 25 / 10%));
+    border: 1px solid oklch(0.5 0.2 25 / 35%);
+    color: oklch(0.7 0.2 25);
+    backdrop-filter: blur(14px) saturate(140%);
     transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
   }
   .glass-button-destructive:hover {
-    background: linear-gradient(135deg, oklch(0.5 0.2 25 / 25%), oklch(0.5 0.2 25 / 15%));
-    border-color: oklch(0.5 0.2 25 / 50%);
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, oklch(0.5 0.2 25 / 30%), oklch(0.5 0.2 25 / 18%));
+    border-color: oklch(0.5 0.2 25 / 55%);
+    transform: translateY(-2px);
   }
 
   .glass-panel {
