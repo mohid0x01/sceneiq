@@ -522,46 +522,6 @@
     transform: scale(1.1);
   }
 
-  /* Aurora mesh gradient background */
-  .aurora-bg {
-    position: absolute;
-    inset: -20%;
-    background:
-      radial-gradient(ellipse 60% 50% at 20% 30%, oklch(0.72 0.12 85 / 18%), transparent 60%),
-      radial-gradient(ellipse 50% 40% at 80% 20%, oklch(0.55 0.18 280 / 14%), transparent 60%),
-      radial-gradient(ellipse 70% 50% at 60% 80%, oklch(0.5 0.18 25 / 12%), transparent 65%),
-      radial-gradient(ellipse 40% 40% at 10% 90%, oklch(0.6 0.15 180 / 10%), transparent 60%);
-    filter: blur(40px);
-    animation: auroraDrift 18s ease-in-out infinite alternate;
-    pointer-events: none;
-  }
-
-  /* Animated grid overlay */
-  .grid-overlay {
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(oklch(0.72 0.12 85 / 6%) 1px, transparent 1px),
-      linear-gradient(90deg, oklch(0.72 0.12 85 / 6%) 1px, transparent 1px);
-    background-size: 64px 64px;
-    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, black 30%, transparent 80%);
-    pointer-events: none;
-  }
-
-  /* Conic rotating ring */
-  .conic-ring {
-    background: conic-gradient(from 0deg,
-      transparent 0deg,
-      oklch(0.72 0.12 85 / 35%) 60deg,
-      transparent 120deg,
-      oklch(0.55 0.18 280 / 25%) 200deg,
-      transparent 260deg,
-      oklch(0.72 0.12 85 / 30%) 320deg,
-      transparent 360deg);
-    animation: rotateGlow 22s linear infinite;
-    filter: blur(30px);
-  }
-
   /* Gradient gold heading text */
   .text-gradient-gold {
     background: linear-gradient(135deg,
@@ -592,12 +552,45 @@
     transform: translateX(-100%);
     animation: shineSweep 3.5s ease-in-out infinite;
   }
-}
 
-@keyframes auroraDrift {
-  0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
-  50%  { transform: translate(3%, -2%) rotate(8deg) scale(1.05); }
-  100% { transform: translate(-2%, 3%) rotate(-6deg) scale(1.08); }
+  /* Water-ripple sweep on form controls — matches glass buttons */
+  .glass-input,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+  textarea,
+  [data-slot="select-trigger"],
+  button[role="combobox"] {
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .glass-input::before,
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="submit"]):not([type="button"]):not([type="reset"])::before,
+  textarea::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg,
+      transparent 35%,
+      rgba(255, 220, 140, 0.18) 50%,
+      transparent 65%);
+    transform: translateX(-120%);
+    transition: transform 900ms cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .glass-input:hover::before,
+  .glass-input:focus::before,
+  input:hover::before,
+  input:focus::before,
+  textarea:hover::before,
+  textarea:focus::before {
+    transform: translateX(120%);
+  }
+  .glass-input:active,
+  input:active,
+  textarea:active {
+    transform: scale(0.995);
+    transition-duration: 80ms;
+  }
 }
 
 @keyframes gradientShift {
@@ -631,7 +624,3 @@
   50% { transform: translateY(-4px); }
 }
 
-@keyframes rotateGlow {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
