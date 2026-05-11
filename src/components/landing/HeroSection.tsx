@@ -26,21 +26,6 @@ export function HeroSection() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
       </div>
 
-      {/* Aurora mesh */}
-      <div className="aurora-bg" />
-
-      {/* Grid overlay */}
-      <div className="grid-overlay" />
-
-      {/* Conic rotating ring */}
-      <div className="absolute right-[15%] top-[30%] h-[600px] w-[600px] rounded-full conic-ring opacity-40" />
-
-      {/* Animated radial glow */}
-      <motion.div
-        className="absolute right-[20%] top-[40%] h-[500px] w-[500px] rounded-full bg-gold/8 blur-[120px]"
-        animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.85, 0.4] }}
-        transition={{ repeat: Infinity, duration: 7, ease: "easeInOut" }}
-      />
 
       {/* Floating particles */}
       {[...Array(12)].map((_, i) => (
