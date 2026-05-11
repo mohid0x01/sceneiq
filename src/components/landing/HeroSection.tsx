@@ -46,7 +46,24 @@ export function HeroSection() {
         />
       ))}
 
-      <div className="relative z-10 mx-auto max-w-7xl px-6 py-20">
+      <div className="relative z-10 mx-auto w-full max-w-[1600px] px-6 py-20">
+        {/* Mega blackletter display title */}
+        <motion.div
+          className="pointer-events-none mb-8 select-none"
+          initial={{ opacity: 0, y: 60, rotateX: 20 }}
+          animate={{ opacity: 1, y: 0, rotateX: 0 }}
+          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="blackletter-slice mega-3d">
+            <span
+              className="blackletter-mega slice block text-[22vw] leading-[0.82] md:text-[18vw]"
+              data-text="sceneiq"
+            >
+              sceneiq
+            </span>
+          </div>
+        </motion.div>
+
         <motion.div
           className="max-w-full px-2 md:max-w-[60%] md:px-0"
           initial={{ opacity: 0, y: 20 }}
@@ -69,15 +86,15 @@ export function HeroSection() {
           <GoldDivider />
 
           <motion.h1
-            className="font-display text-4xl font-bold leading-[1.05] md:text-6xl lg:text-[72px]"
+            className="font-sans text-3xl font-extrabold leading-[1.05] tracking-tight md:text-5xl lg:text-[56px] lowercase"
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.7 }}
           >
-            <span className="text-text-primary">We Turn Unstructured </span>
-            <span className="text-gradient-gold">FIR Text</span>
-            <span className="text-text-primary"> Into Visual </span>
-            <span className="text-gradient-gold">Crime Reconstructions</span>
+            <span className="text-text-primary">we turn unstructured </span>
+            <span className="text-gradient-gold">fir text</span>
+            <span className="text-text-primary"> into visual </span>
+            <span className="text-gradient-gold">crime reconstructions</span>
           </motion.h1>
 
           <motion.p
