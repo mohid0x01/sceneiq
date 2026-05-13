@@ -41,20 +41,23 @@
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
 
-  --color-gold: oklch(0.72 0.12 85);
-  --color-gold-light: oklch(0.82 0.11 85);
-  --color-gold-muted: oklch(0.52 0.09 85);
-  --color-gold-dim: oklch(0.72 0.12 85 / 40%);
-  --color-surface: oklch(0.13 0.005 60);
-  --color-surface-elevated: oklch(0.16 0.005 60);
-  --color-surface-overlay: oklch(0.19 0.005 60);
-  --color-text-primary: oklch(0.95 0.015 75);
-  --color-text-secondary: oklch(0.66 0.02 60);
-  --color-text-muted: oklch(0.42 0.015 55);
-  --color-border-subtle: oklch(0.18 0.01 55);
-  --color-border-accent: oklch(0.24 0.015 55);
-  --color-success: oklch(0.6 0.17 150);
-  --color-processing: oklch(0.35 0.08 250);
+  /* Platinum / icy-white accent system (renamed from gold; class names kept for compat) */
+  --color-gold: oklch(0.92 0.012 240);
+  --color-gold-light: oklch(0.98 0.008 240);
+  --color-gold-muted: oklch(0.68 0.015 240);
+  --color-gold-dim: oklch(0.92 0.012 240 / 40%);
+  --color-platinum: oklch(0.92 0.012 240);
+  --color-ice: oklch(0.86 0.04 220);
+  --color-surface: oklch(0.10 0.004 240);
+  --color-surface-elevated: oklch(0.14 0.005 240);
+  --color-surface-overlay: oklch(0.18 0.006 240);
+  --color-text-primary: oklch(0.97 0.005 240);
+  --color-text-secondary: oklch(0.72 0.012 240);
+  --color-text-muted: oklch(0.48 0.012 240);
+  --color-border-subtle: oklch(0.20 0.008 240);
+  --color-border-accent: oklch(0.28 0.012 240);
+  --color-success: oklch(0.72 0.14 160);
+  --color-processing: oklch(0.62 0.16 230);
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
