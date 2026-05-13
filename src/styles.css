@@ -15,8 +15,9 @@
   --radius-3xl: 8px;
   --radius-4xl: 8px;
 
-  --font-display: 'Playfair Display', Georgia, serif;
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'UnifrakturMaguntia', 'Pirata One', 'Times New Roman', serif;
+  --font-blackletter: 'UnifrakturMaguntia', 'Pirata One', serif;
+  --font-sans: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   --color-background: var(--background);
