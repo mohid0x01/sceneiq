@@ -1,9 +1,16 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
-@import url('https://fonts.googleapis.com/css2?family=Pirata+One&family=UnifrakturCook:wght@700&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@400;700;900&display=swap');
 
 @custom-variant dark (&:is(.dark *));
+
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
+}
 
 @theme inline {
   --radius-sm: 2px;
@@ -14,10 +21,9 @@
   --radius-3xl: 8px;
   --radius-4xl: 8px;
 
-  --font-display: 'Pirata One', 'UnifrakturCook', 'Playfair Display', Georgia, serif;
-  --font-sans: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
-  --font-serif: 'Playfair Display', Georgia, serif;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -618,56 +624,3 @@
   50% { transform: translateY(-4px); }
 }
 
-
-/* ===== Blackletter mega-display (portfolio-style hero) ===== */
-.blackletter-mega {
-  font-family: 'Pirata One', 'UnifrakturCook', serif;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 0.82;
-  background: linear-gradient(180deg, oklch(0.78 0.13 85) 0%, oklch(0.58 0.11 85) 60%, oklch(0.32 0.06 85) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 8px 30px rgba(201, 168, 76, 0.25)) drop-shadow(0 2px 0 rgba(0,0,0,0.6));
-  text-transform: lowercase;
-  user-select: none;
-}
-
-.blackletter-slice {
-  position: relative;
-  display: inline-block;
-  perspective: 1200px;
-  transform-style: preserve-3d;
-}
-
-.blackletter-slice .slice {
-  display: block;
-  position: relative;
-}
-
-.blackletter-slice .slice::after {
-  content: attr(data-text);
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 48%, rgba(0,0,0,0.85) 48%, rgba(0,0,0,0.85) 52%, transparent 52%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  pointer-events: none;
-}
-
-@keyframes mega3dFloat {
-  0%, 100% { transform: rotateX(8deg) rotateY(-2deg) translateZ(0); }
-  50% { transform: rotateX(4deg) rotateY(2deg) translateZ(20px); }
-}
-
-.mega-3d {
-  animation: mega3dFloat 8s ease-in-out infinite;
-  transform-style: preserve-3d;
-}
-
-@keyframes megaShift {
-  0% { background-position: 0% 0%; }
-  100% { background-position: 0% 100%; }
-}

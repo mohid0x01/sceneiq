@@ -1,16 +1,5 @@
 # CHANGELOG — SCENEIQ FIR Scene Reconstruction Portal
 
-## [0.7.0] — 2026-05-11
-
-### Added
-- **Mega Blackletter Hero**: Giant `sceneiq` Pirata One blackletter title (~22vw) with gold gradient fill, 3D float animation (`mega-3d`), and horizontal slice cut — inspired by mohid0x01.vercel.app.
-- **Bricolage Grotesque Body Font**: Bold lowercase rounded sans now powers all body copy / headings, paired with Pirata One blackletter for display moments. Playfair Display kept as fallback serif.
-
-### Changed
-- Hero `<h1>` switched to lowercase Bricolage extrabold to match portfolio aesthetic while keeping the gold-gradient accent words.
-- `--font-display` and `--font-sans` design tokens updated globally — every module inherits the new typography.
-
-
 ## [0.4.0] — 2026-05-09
 
 ### Added
