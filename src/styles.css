@@ -15,8 +15,7 @@
   --radius-3xl: 8px;
   --radius-4xl: 8px;
 
-  --font-display: 'UnifrakturMaguntia', 'Pirata One', 'Times New Roman', serif;
-  --font-blackletter: 'UnifrakturMaguntia', 'Pirata One', serif;
+  --font-display: 'Sora', 'Bricolage Grotesque', system-ui, sans-serif;
   --font-sans: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
