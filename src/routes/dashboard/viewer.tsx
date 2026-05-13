@@ -201,13 +201,7 @@ function SceneViewer() {
             <Suspense fallback={<div className="h-[260px] animate-pulse rounded-[6px] bg-surface" />}>
               <CrimeMap
                 height="260px"
-                locations={(() => {
-                  const labels = locationEntities.map((l) => l.label);
-                  // dynamic geocode (lightweight)
-                  // eslint-disable-next-line @typescript-eslint/no-require-imports
-                  const { geocodeFirText } = require("@/components/CrimeMap") as typeof import("@/components/CrimeMap");
-                  return geocodeFirText(firText, labels);
-                })()}
+                 locations={geocodeFirText(firText, locationEntities.map((l) => l.label))}
               />
             </Suspense>
             <p className="mt-2 text-[10px] text-text-muted">
