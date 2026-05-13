@@ -4,13 +4,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@font-face {
-  font-family: 'Playfair Display';
-  font-style: normal;
-  font-weight: 400 900;
-  font-display: swap;
-  src: url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
-}
+/* Fonts loaded via <link> in __root.tsx — UnifrakturMaguntia, Pirata One, Bricolage Grotesque, JetBrains Mono */
 
 @theme inline {
   --radius-sm: 2px;
