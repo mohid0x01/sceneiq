@@ -1,0 +1,10 @@
+ALTER TYPE incident_type ADD VALUE IF NOT EXISTS 'arson';
+ALTER TYPE incident_type ADD VALUE IF NOT EXISTS 'fraud';
+ALTER TYPE incident_type ADD VALUE IF NOT EXISTS 'cybercrime';
+ALTER TYPE incident_type ADD VALUE IF NOT EXISTS 'narcotics';
+ALTER TYPE incident_type ADD VALUE IF NOT EXISTS 'homicide';
+ALTER TYPE incident_type ADD VALUE IF NOT EXISTS 'domestic_violence';
+ALTER TYPE incident_type ADD VALUE IF NOT EXISTS 'sexual_assault';
+ALTER TYPE incident_type ADD VALUE IF NOT EXISTS 'terrorism';
+ALTER TYPE incident_type ADD VALUE IF NOT EXISTS 'smuggling';
+ALTER TYPE incident_type ADD VALUE IF NOT EXISTS 'vandalism';
