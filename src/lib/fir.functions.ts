@@ -6,7 +6,11 @@ const submitFirSchema = z.object({
   caseNumber: z.string().min(1).max(50),
   district: z.string().min(1).max(100),
   incidentDate: z.string().nullable(),
-  incidentType: z.enum(["theft", "assault", "vehicular", "property", "kidnapping", "robbery", "other"]),
+  incidentType: z.enum([
+    "theft", "assault", "vehicular", "property", "kidnapping", "robbery", "other",
+    "arson", "fraud", "cybercrime", "narcotics", "homicide",
+    "domestic_violence", "sexual_assault", "terrorism", "smuggling", "vandalism",
+  ]),
   narrative: z.string().min(10).max(50000),
 });
 
