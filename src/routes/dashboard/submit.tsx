@@ -1,25 +1,26 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useServerFn } from "@tanstack/react-start";
 import { submitFir, runMockPipeline } from "@/lib/fir.functions";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  PAKISTAN_DISTRICTS,
+  INCIDENT_TYPES,
+  generateCaseNumber,
+} from "@/lib/pakistan-locations";
 
 export const Route = createFileRoute("/dashboard/submit")({
   component: SubmitFIR,
 });
 
-const districts = ["Khairpur", "Sukkur", "Larkana", "Hyderabad", "Karachi South", "Karachi East", "Thatta", "Dadu", "Nawabshah"];
-const incidentTypes = [
-  { label: "Theft", value: "theft" },
-  { label: "Assault", value: "assault" },
-  { label: "Vehicular", value: "vehicular" },
-  { label: "Property", value: "property" },
-  { label: "Kidnapping", value: "kidnapping" },
-  { label: "Robbery", value: "robbery" },
-  { label: "Other", value: "other" },
-] as const;
-const pipelineStages = ["Preprocessing", "Entity Extraction", "Spatial Resolution", "Timeline Sequencing", "Scene Generation"];
+const pipelineStages = [
+  "Preprocessing",
+  "Entity Extraction",
+  "Spatial Resolution",
+  "Timeline Sequencing",
+  "Scene Generation",
+];
 const tips = [
   "Include all actor descriptions as stated",
   "Mention locations by name or landmark",
@@ -28,18 +29,28 @@ const tips = [
   "Minimum 50 words for accurate reconstruction",
 ];
 
+const DEFAULT_DISTRICT = "Karachi South";
+
 function SubmitFIR() {
   const [narrative, setNarrative] = useState("");
-  const [caseNumber, setCaseNumber] = useState("FIR-2024-SHK-00143");
-  const [district, setDistrict] = useState("Khairpur");
+  const [district, setDistrict] = useState(DEFAULT_DISTRICT);
+  const [caseNumber, setCaseNumber] = useState(() => generateCaseNumber(DEFAULT_DISTRICT));
+  const [caseAuto, setCaseAuto] = useState(true);
   const [incidentDate, setIncidentDate] = useState("");
-  const [incidentType, setIncidentType] = useState<typeof incidentTypes[number]["value"]>("assault");
+  const [incidentType, setIncidentType] = useState<string>("assault");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const submitFirFn = useServerFn(submitFir);
   const runPipelineFn = useServerFn(runMockPipeline);
+
+  // Keep case number in sync with district while user hasn't manually edited it
+  useEffect(() => {
+    if (caseAuto) setCaseNumber(generateCaseNumber(district));
+  }, [district, caseAuto]);
+
+  const districtOptions = useMemo(() => PAKISTAN_DISTRICTS, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,15 +74,12 @@ function SubmitFIR() {
           caseNumber,
           district,
           incidentDate: incidentDate || null,
-          incidentType,
+          incidentType: incidentType as "assault",
           narrative,
         },
       });
 
-      // Fire pipeline in background (don't await)
       runPipelineFn({ data: { jobId: result.jobId } }).catch(console.error);
-
-      // Navigate to processing page with jobId
       navigate({ to: "/dashboard/processing", search: { jobId: result.jobId } });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to submit FIR");
@@ -99,22 +107,47 @@ function SubmitFIR() {
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div className="grid gap-5 md:grid-cols-2">
             <div>
-              <label className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">Case Number</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+                  Case Number {caseAuto && <span className="ml-1 text-gold/70">· auto</span>}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCaseAuto(true);
+                    setCaseNumber(generateCaseNumber(district));
+                  }}
+                  className="text-[10px] font-semibold uppercase tracking-[0.15em] text-gold/80 hover:text-gold"
+                >
+                  Regenerate
+                </button>
+              </div>
               <input
                 type="text"
                 value={caseNumber}
-                onChange={(e) => setCaseNumber(e.target.value)}
-                className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 font-mono text-sm text-gold placeholder:text-text-muted focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+                onChange={(e) => {
+                  setCaseAuto(false);
+                  setCaseNumber(e.target.value);
+                }}
+                className="glass-input mt-2 w-full rounded-[2px] px-4 py-3 font-mono text-sm text-gold"
               />
             </div>
             <div>
-              <label className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">District</label>
+              <label className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">
+                District / City
+              </label>
               <select
                 value={district}
                 onChange={(e) => setDistrict(e.target.value)}
-                className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 text-sm text-text-primary focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+                className="glass-input mt-2 w-full rounded-[2px] px-4 py-3 text-sm text-text-primary"
               >
-                {districts.map(d => <option key={d}>{d}</option>)}
+                {districtOptions.map((group) => (
+                  <optgroup key={group.province} label={group.province}>
+                    {group.districts.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </optgroup>
+                ))}
               </select>
             </div>
           </div>
@@ -126,17 +159,19 @@ function SubmitFIR() {
                 type="date"
                 value={incidentDate}
                 onChange={(e) => setIncidentDate(e.target.value)}
-                className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 text-sm text-text-primary focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+                className="glass-input mt-2 w-full rounded-[2px] px-4 py-3 text-sm text-text-primary"
               />
             </div>
             <div>
               <label className="text-[11px] font-semibold uppercase tracking-[0.15em] text-text-muted">Incident Type</label>
               <select
                 value={incidentType}
-                onChange={(e) => setIncidentType(e.target.value as typeof incidentType)}
-                className="mt-2 w-full rounded-[2px] border border-border-accent bg-input px-4 py-3 text-sm text-text-primary focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+                onChange={(e) => setIncidentType(e.target.value)}
+                className="glass-input mt-2 w-full rounded-[2px] px-4 py-3 text-sm text-text-primary"
               >
-                {incidentTypes.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                {INCIDENT_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
               </select>
             </div>
           </div>
@@ -149,7 +184,7 @@ function SubmitFIR() {
                 onChange={(e) => setNarrative(e.target.value)}
                 rows={10}
                 placeholder="Enter the full FIR narrative here. Roman Urdu and English both supported. Example: Mulzim Ahmed ne raat 11 baje Bazaar Road par victim Imran ko loha rod se mara..."
-                className="w-full resize-none rounded-[2px] border border-border-accent bg-[oklch(0.11_0.005_60)] px-4 py-3 text-sm leading-relaxed text-text-primary placeholder:text-text-muted focus:border-gold focus:outline-none focus:ring-1 focus:ring-gold"
+                className="glass-input w-full resize-none rounded-[2px] px-4 py-3 text-sm leading-relaxed text-text-primary placeholder:text-text-muted"
               />
               <span className="absolute bottom-3 right-3 font-mono text-[11px] text-text-muted">
                 {narrative.length} chars

@@ -9,23 +9,26 @@ const steps = [
 
 export function HowItWorksSection() {
   return (
-    <section id="how-it-works" className="py-28">
+    <section id="how-it-works" className="py-20 md:py-28">
       <div className="mx-auto max-w-7xl px-6">
         <motion.div
-          className="text-center"
+          className="mx-auto flex max-w-3xl flex-col items-center text-center"
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
         >
           <p className="label-uppercase">Process</p>
-          <h2 className="mt-4 font-display text-4xl font-bold text-text-primary">
+          <h2 className="mt-4 font-display text-balance text-3xl font-bold leading-[1.15] tracking-tight text-text-primary sm:text-4xl md:text-5xl">
             Three Steps to a Full Reconstruction
           </h2>
+          <p className="mt-4 max-w-xl text-sm text-text-secondary md:text-base">
+            From raw FIR text to an interactive 3D scene — usually in under 30 seconds.
+          </p>
         </motion.div>
 
-        <div className="mt-20 flex flex-col items-center gap-0 md:flex-row md:gap-0">
+        <div className="mt-16 flex flex-col items-center gap-0 md:mt-20 md:flex-row md:gap-0">
           {steps.map((step, i) => (
-            <div key={step.title} className="flex flex-1 flex-col items-center md:flex-row">
+            <div key={step.title} className="flex w-full flex-1 flex-col items-center md:flex-row">
               <motion.div
                 className="flex flex-col items-center text-center"
                 initial={{ opacity: 0, y: 20 }}
@@ -34,8 +37,8 @@ export function HowItWorksSection() {
                 transition={{ duration: 0.4, delay: i * 0.15 }}
               >
                 <motion.div
-                  className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-gold/40 bg-surface glass-panel"
-                  whileHover={{ scale: 1.12, borderColor: "oklch(0.82 0.11 85 / 60%)" }}
+                  className="glass-panel flex h-16 w-16 items-center justify-center rounded-full border-2 border-gold/40 bg-surface"
+                  whileHover={{ scale: 1.12, borderColor: "oklch(0.72 0.18 255 / 70%)" }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   <motion.div

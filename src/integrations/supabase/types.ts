@@ -276,6 +276,16 @@ export type Database = {
         | "kidnapping"
         | "robbery"
         | "other"
+        | "arson"
+        | "fraud"
+        | "cybercrime"
+        | "narcotics"
+        | "homicide"
+        | "domestic_violence"
+        | "sexual_assault"
+        | "terrorism"
+        | "smuggling"
+        | "vandalism"
       job_status:
         | "pending"
         | "preprocessing"
@@ -422,6 +432,16 @@ export const Constants = {
         "kidnapping",
         "robbery",
         "other",
+        "arson",
+        "fraud",
+        "cybercrime",
+        "narcotics",
+        "homicide",
+        "domestic_violence",
+        "sexual_assault",
+        "terrorism",
+        "smuggling",
+        "vandalism",
       ],
       job_status: [
         "pending",
