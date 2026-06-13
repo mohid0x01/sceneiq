@@ -379,7 +379,11 @@ function SceneViewer() {
               </div>
             )}
 
-            <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-[4px] border border-border-accent py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-text-secondary transition-colors hover:border-gold hover:text-gold">
+            <button
+              onClick={() => setShowSourceText(true)}
+              disabled={!firText}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-md border border-border py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-foreground/80 transition-colors hover:border-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <FileText className="h-3.5 w-3.5" /> Source Text
             </button>
 
