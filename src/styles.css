@@ -40,23 +40,23 @@
   --color-ring: var(--ring);
   --color-ring-offset-background: var(--background);
 
-  /* Platinum / icy-white accent system (renamed from gold; class names kept for compat) */
-  --color-gold: oklch(0.65 0 0);
-  --color-gold-light: oklch(0.98 0 0);
-  --color-gold-muted: oklch(0.68 0 0);
-  --color-gold-dim: oklch(0.65 0 0 / 40%);
-  --color-platinum: oklch(0.65 0 0);
-  --color-ice: oklch(0.86 0 0);
-  --color-surface: oklch(0.10 0 0);
-  --color-surface-elevated: oklch(0.14 0 0);
-  --color-surface-overlay: oklch(0.18 0 0);
-  --color-text-primary: oklch(0.97 0 0);
-  --color-text-secondary: oklch(0.72 0 0);
-  --color-text-muted: oklch(0.48 0 0);
-  --color-border-subtle: oklch(0.20 0 0);
-  --color-border-accent: oklch(0.28 0 0);
-  --color-success: oklch(0.72 0 0);
-  --color-processing: oklch(0.62 0 0);
+  /* Compat accent tokens (theme-aware via :root / .dark) */
+  --color-gold: var(--color-gold);
+  --color-gold-light: var(--color-gold-light);
+  --color-gold-muted: var(--color-gold-muted);
+  --color-gold-dim: var(--color-gold-dim);
+  --color-platinum: var(--color-platinum);
+  --color-ice: var(--color-ice);
+  --color-surface: var(--color-surface);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-surface-overlay: var(--color-surface-overlay);
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
+  --color-border-subtle: var(--color-border-subtle);
+  --color-border-accent: var(--color-border-accent);
+  --color-success: var(--color-success);
+  --color-processing: var(--color-processing);
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
