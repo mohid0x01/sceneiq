@@ -18,6 +18,7 @@ import {
   Loader,
 } from "lucide-react";
 import { z } from "zod";
+import { toast } from "sonner";
 import { useSceneStore } from "@/stores/sceneStore";
 import { useJobRealtime } from "@/hooks/useJobRealtime";
 import { supabase } from "@/integrations/supabase/client";
