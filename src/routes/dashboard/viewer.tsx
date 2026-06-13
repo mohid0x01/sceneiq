@@ -18,6 +18,7 @@ import {
   Loader,
 } from "lucide-react";
 import { z } from "zod";
+import { toast } from "sonner";
 import { useSceneStore } from "@/stores/sceneStore";
 import { useJobRealtime } from "@/hooks/useJobRealtime";
 import { supabase } from "@/integrations/supabase/client";
@@ -42,8 +43,34 @@ type SceneEntity = Tables<"scene_entities">;
 type SceneEvent = Tables<"scene_events">;
 
 function SceneViewer() {
-  const { jobId } = Route.useSearch();
-  const job = useJobRealtime(jobId || null);
+  const { jobId: searchJobId } = Route.useSearch();
+  const [resolvedJobId, setResolvedJobId] = useState<string | null>(searchJobId || null);
+  const [showSourceText, setShowSourceText] = useState(false);
+  const [recentJobs, setRecentJobs] = useState<{ id: string; case_number: string | null; status: string }[]>([]);
+
+  // If no jobId, auto-pick most recent completed job, otherwise list selectable ones
+  useEffect(() => {
+    if (searchJobId) { setResolvedJobId(searchJobId); return; }
+    supabase
+      .from("fir_jobs")
+      .select("id, status, fir_records(case_number)")
+      .order("created_at", { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (!data) return;
+        const list = data.map((d) => ({
+          id: d.id,
+          status: d.status,
+          case_number: (d.fir_records as { case_number?: string } | null)?.case_number || null,
+        }));
+        setRecentJobs(list);
+        const firstCompleted = list.find((j) => j.status === "completed");
+        if (firstCompleted) setResolvedJobId(firstCompleted.id);
+      });
+  }, [searchJobId]);
+
+  const jobId = resolvedJobId;
+  const job = useJobRealtime(jobId);
   const [entities, setEntities] = useState<SceneEntity[]>([]);
   const [events, setEvents] = useState<SceneEvent[]>([]);
   const [firText, setFirText] = useState<string>("");
@@ -136,27 +163,80 @@ function SceneViewer() {
     }
   };
 
-  const isLoading = !job || (job.status !== "completed" && job.status !== "failed");
+  const isLoading = !!jobId && (!job || (job.status !== "completed" && job.status !== "failed"));
+  const noJob = !jobId;
   const caseNumber = (job as Record<string, unknown>)?.fir_records
     ? ((job as Record<string, unknown>).fir_records as Record<string, string>)?.case_number
     : jobId?.slice(0, 12) || "—";
 
+  const handleDownload = () => {
+    if (!jobId) return;
+    const payload = {
+      case_number: caseNumber,
+      job_id: jobId,
+      status: job?.status,
+      processing_time_ms: job?.processing_time_ms,
+      entities,
+      events,
+      fir_narrative: firText,
+      exported_at: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${caseNumber || jobId}.sceneiq.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Reconstruction exported");
+  };
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/dashboard/viewer?jobId=${jobId || ""}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `SceneIQ ${caseNumber}`, url: shareUrl });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Share link copied to clipboard");
+      }
+    } catch {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Share link copied to clipboard");
+      } catch {
+        toast.error("Could not share");
+      }
+    }
+  };
+
+  const handleExpand = () => {
+    const el = document.documentElement;
+    if (!document.fullscreenElement) {
+      el.requestFullscreen?.().catch(() => toast.error("Fullscreen blocked"));
+    } else {
+      document.exitFullscreen?.();
+    }
+  };
+
   return (
-    <div className="-m-8 flex h-[calc(100vh-73px)] flex-col bg-[oklch(0.06_0.005_250)]">
+    <div className="-m-8 flex h-[calc(100vh-73px)] flex-col bg-background">
       {/* Top bar */}
-      <div className="flex h-12 items-center justify-between border-b border-border-subtle bg-background px-4">
+      <div className="flex h-12 items-center justify-between border-b border-border bg-background px-4">
         <div className="flex items-center gap-3">
-          <Link to="/dashboard" className="text-text-muted hover:text-gold"><ArrowLeft className="h-4 w-4" /></Link>
-          <span className="font-mono text-sm text-gold">{String(caseNumber)}</span>
-          {isLoading && <Loader className="h-3 w-3 animate-spin text-blue-400" />}
+          <Link to="/dashboard" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /></Link>
+          <span className="font-mono text-sm text-foreground">{String(caseNumber)}</span>
+          {isLoading && <Loader className="h-3 w-3 animate-spin text-foreground/70" />}
         </div>
-        <span className="text-sm text-text-secondary">
-          {job?.status === "completed" ? "Scene Reconstruction" : `Pipeline: ${job?.status || "loading"}`}
+        <span className="text-sm text-muted-foreground">
+          {noJob ? "Pick a reconstruction" : job?.status === "completed" ? "Scene Reconstruction" : `Pipeline: ${job?.status || "loading"}`}
         </span>
-        <div className="flex items-center gap-2">
-          <button className="rounded-[4px] p-1.5 text-text-muted hover:bg-surface hover:text-gold"><Download className="h-4 w-4" /></button>
-          <button className="rounded-[4px] p-1.5 text-text-muted hover:bg-surface hover:text-gold"><Share2 className="h-4 w-4" /></button>
-          <button className="rounded-[4px] p-1.5 text-text-muted hover:bg-surface hover:text-gold"><Expand className="h-4 w-4" /></button>
+        <div className="flex items-center gap-1">
+          <button onClick={handleDownload} disabled={!jobId || job?.status !== "completed"} title="Download JSON" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent"><Download className="h-4 w-4" /></button>
+          <button onClick={handleShare} disabled={!jobId} title="Share link" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent"><Share2 className="h-4 w-4" /></button>
+          <button onClick={handleExpand} title="Fullscreen" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><Expand className="h-4 w-4" /></button>
         </div>
       </div>
 
@@ -212,23 +292,52 @@ function SceneViewer() {
 
         {/* 3D Canvas */}
         <div className="relative flex-1">
-          {isLoading ? (
+          {noJob ? (
+            <div className="flex h-full items-center justify-center p-8">
+              <div className="w-full max-w-md text-center">
+                <FileText className="mx-auto h-10 w-10 text-muted-foreground" />
+                <p className="mt-4 text-base font-semibold text-foreground">Pick a reconstruction to view</p>
+                <p className="mt-1 text-sm text-muted-foreground">No reconstruction selected. Choose a completed case below or submit a new FIR.</p>
+                <div className="mt-6 max-h-[40vh] space-y-1 overflow-y-auto rounded-md border border-border bg-card p-2 text-left">
+                  {recentJobs.length === 0 && (
+                    <p className="px-3 py-6 text-center text-xs text-muted-foreground">No cases yet.</p>
+                  )}
+                  {recentJobs.map((j) => (
+                    <button
+                      key={j.id}
+                      onClick={() => setResolvedJobId(j.id)}
+                      className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
+                    >
+                      <span className="font-mono text-foreground">{j.case_number || j.id.slice(0, 8)}</span>
+                      <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{j.status}</span>
+                    </button>
+                  ))}
+                </div>
+                <Link to="/dashboard/submit" className="mt-4 inline-block rounded-md bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground">
+                  Submit new FIR
+                </Link>
+              </div>
+            </div>
+          ) : isLoading ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
-                <Loader className="mx-auto h-8 w-8 animate-spin text-gold" />
-                <p className="mt-4 text-sm text-text-muted">Waiting for pipeline to complete...</p>
-                <p className="mt-1 font-mono text-[11px] text-gold">{job?.status || "connecting"}</p>
+                <Loader className="mx-auto h-8 w-8 animate-spin text-foreground/70" />
+                <p className="mt-4 text-sm text-muted-foreground">Waiting for pipeline to complete...</p>
+                <p className="mt-1 font-mono text-[11px] text-foreground">{job?.status || "connecting"}</p>
+                <Link to="/dashboard/processing" search={{ jobId: jobId || "" }} className="mt-4 inline-block text-xs font-semibold uppercase tracking-wider text-foreground underline">
+                  Watch live pipeline
+                </Link>
               </div>
             </div>
           ) : (
             <>
-              <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader className="h-6 w-6 animate-spin text-gold" /></div>}>
+              <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader className="h-6 w-6 animate-spin text-foreground/70" /></div>}>
                 <Scene3DCanvas entities={entities} events={events} />
               </Suspense>
 
               {events.length > 0 && (
-                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 rounded-[4px] border border-gold/20 bg-background/80 px-6 py-3 backdrop-blur-md">
-                  <p className="max-w-md text-center text-sm text-text-primary">
+                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 rounded-md border border-border bg-background/85 px-6 py-3 backdrop-blur-md">
+                  <p className="max-w-md text-center text-sm text-foreground">
                     {events[currentEvent]?.description || ""}
                   </p>
                 </div>
@@ -270,7 +379,11 @@ function SceneViewer() {
               </div>
             )}
 
-            <button className="mt-6 flex w-full items-center justify-center gap-2 rounded-[4px] border border-border-accent py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-text-secondary transition-colors hover:border-gold hover:text-gold">
+            <button
+              onClick={() => setShowSourceText(true)}
+              disabled={!firText}
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-md border border-border py-2.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-foreground/80 transition-colors hover:border-foreground hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <FileText className="h-3.5 w-3.5" /> Source Text
             </button>
 
@@ -333,8 +446,44 @@ function SceneViewer() {
             ))}
           </div>
         </div>
-        <p className="mt-2 text-[12px] text-text-muted">{events[currentEvent]?.description || "No events loaded"}</p>
       </div>
+
+      {/* Source Text dialog */}
+      {showSourceText && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4" onClick={() => setShowSourceText(false)}>
+          <div className="w-full max-w-2xl overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <div>
+                <p className="text-sm font-semibold">Source FIR Narrative</p>
+                <p className="text-[11px] text-muted-foreground">{String(caseNumber)}</p>
+              </div>
+              <button onClick={() => setShowSourceText(false)} className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+                <ArrowLeft className="h-4 w-4 rotate-45" />
+              </button>
+            </div>
+            <div className="max-h-[65vh] overflow-y-auto px-5 py-4">
+              <p className="whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-foreground">
+                {firText || "No source text available."}
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-border bg-muted/40 px-5 py-3">
+              <button
+                onClick={() => { navigator.clipboard.writeText(firText); toast.success("Copied"); }}
+                disabled={!firText}
+                className="rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted disabled:opacity-50"
+              >
+                Copy
+              </button>
+              <button
+                onClick={() => setShowSourceText(false)}
+                className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
