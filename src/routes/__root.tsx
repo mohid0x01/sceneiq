@@ -98,9 +98,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('theme')||'dark';var r=document.documentElement;r.classList.remove('dark','light');r.classList.add(t);}catch(e){}})();`,
+          }}
+        />
       </head>
       <body>
         {children}
@@ -115,10 +120,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="relative min-h-screen bg-black">
-        <TwinklingStars density={200} />
-        <div className="pointer-events-none fixed inset-0 z-[1] global-grid" aria-hidden="true" />
-        <div className="pointer-events-none fixed inset-0 z-[2] global-vignette" aria-hidden="true" />
+      <div className="relative min-h-screen bg-background text-foreground">
         <div className="relative z-10">
           <Outlet />
         </div>
