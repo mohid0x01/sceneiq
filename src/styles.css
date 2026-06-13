@@ -15,8 +15,8 @@
   --radius-3xl: 8px;
   --radius-4xl: 8px;
 
-  --font-display: 'Sora', 'Bricolage Grotesque', system-ui, sans-serif;
-  --font-sans: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+  --font-sans: 'DM Sans', 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   --color-background: var(--background);
