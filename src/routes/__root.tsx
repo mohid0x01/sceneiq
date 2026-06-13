@@ -9,7 +9,6 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import { TwinklingStars } from "@/components/effects/TwinklingStars";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
