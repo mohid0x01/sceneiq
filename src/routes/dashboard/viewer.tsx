@@ -42,8 +42,34 @@ type SceneEntity = Tables<"scene_entities">;
 type SceneEvent = Tables<"scene_events">;
 
 function SceneViewer() {
-  const { jobId } = Route.useSearch();
-  const job = useJobRealtime(jobId || null);
+  const { jobId: searchJobId } = Route.useSearch();
+  const [resolvedJobId, setResolvedJobId] = useState<string | null>(searchJobId || null);
+  const [showSourceText, setShowSourceText] = useState(false);
+  const [recentJobs, setRecentJobs] = useState<{ id: string; case_number: string | null; status: string }[]>([]);
+
+  // If no jobId, auto-pick most recent completed job, otherwise list selectable ones
+  useEffect(() => {
+    if (searchJobId) { setResolvedJobId(searchJobId); return; }
+    supabase
+      .from("fir_jobs")
+      .select("id, status, fir_records(case_number)")
+      .order("created_at", { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (!data) return;
+        const list = data.map((d) => ({
+          id: d.id,
+          status: d.status,
+          case_number: (d.fir_records as { case_number?: string } | null)?.case_number || null,
+        }));
+        setRecentJobs(list);
+        const firstCompleted = list.find((j) => j.status === "completed");
+        if (firstCompleted) setResolvedJobId(firstCompleted.id);
+      });
+  }, [searchJobId]);
+
+  const jobId = resolvedJobId;
+  const job = useJobRealtime(jobId);
   const [entities, setEntities] = useState<SceneEntity[]>([]);
   const [events, setEvents] = useState<SceneEvent[]>([]);
   const [firText, setFirText] = useState<string>("");
