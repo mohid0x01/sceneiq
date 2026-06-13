@@ -446,8 +446,44 @@ function SceneViewer() {
             ))}
           </div>
         </div>
-        <p className="mt-2 text-[12px] text-text-muted">{events[currentEvent]?.description || "No events loaded"}</p>
       </div>
+
+      {/* Source Text dialog */}
+      {showSourceText && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm p-4" onClick={() => setShowSourceText(false)}>
+          <div className="w-full max-w-2xl overflow-hidden rounded-lg border border-border bg-card text-card-foreground shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <div>
+                <p className="text-sm font-semibold">Source FIR Narrative</p>
+                <p className="text-[11px] text-muted-foreground">{String(caseNumber)}</p>
+              </div>
+              <button onClick={() => setShowSourceText(false)} className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground">
+                <ArrowLeft className="h-4 w-4 rotate-45" />
+              </button>
+            </div>
+            <div className="max-h-[65vh] overflow-y-auto px-5 py-4">
+              <p className="whitespace-pre-wrap font-mono text-[13px] leading-relaxed text-foreground">
+                {firText || "No source text available."}
+              </p>
+            </div>
+            <div className="flex justify-end gap-2 border-t border-border bg-muted/40 px-5 py-3">
+              <button
+                onClick={() => { navigator.clipboard.writeText(firText); toast.success("Copied"); }}
+                disabled={!firText}
+                className="rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted disabled:opacity-50"
+              >
+                Copy
+              </button>
+              <button
+                onClick={() => setShowSourceText(false)}
+                className="rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
