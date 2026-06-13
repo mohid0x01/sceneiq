@@ -163,27 +163,80 @@ function SceneViewer() {
     }
   };
 
-  const isLoading = !job || (job.status !== "completed" && job.status !== "failed");
+  const isLoading = !!jobId && (!job || (job.status !== "completed" && job.status !== "failed"));
+  const noJob = !jobId;
   const caseNumber = (job as Record<string, unknown>)?.fir_records
     ? ((job as Record<string, unknown>).fir_records as Record<string, string>)?.case_number
     : jobId?.slice(0, 12) || "—";
 
+  const handleDownload = () => {
+    if (!jobId) return;
+    const payload = {
+      case_number: caseNumber,
+      job_id: jobId,
+      status: job?.status,
+      processing_time_ms: job?.processing_time_ms,
+      entities,
+      events,
+      fir_narrative: firText,
+      exported_at: new Date().toISOString(),
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${caseNumber || jobId}.sceneiq.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast.success("Reconstruction exported");
+  };
+
+  const handleShare = async () => {
+    const shareUrl = `${window.location.origin}/dashboard/viewer?jobId=${jobId || ""}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `SceneIQ ${caseNumber}`, url: shareUrl });
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Share link copied to clipboard");
+      }
+    } catch {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Share link copied to clipboard");
+      } catch {
+        toast.error("Could not share");
+      }
+    }
+  };
+
+  const handleExpand = () => {
+    const el = document.documentElement;
+    if (!document.fullscreenElement) {
+      el.requestFullscreen?.().catch(() => toast.error("Fullscreen blocked"));
+    } else {
+      document.exitFullscreen?.();
+    }
+  };
+
   return (
-    <div className="-m-8 flex h-[calc(100vh-73px)] flex-col bg-[oklch(0.06_0.005_250)]">
+    <div className="-m-8 flex h-[calc(100vh-73px)] flex-col bg-background">
       {/* Top bar */}
-      <div className="flex h-12 items-center justify-between border-b border-border-subtle bg-background px-4">
+      <div className="flex h-12 items-center justify-between border-b border-border bg-background px-4">
         <div className="flex items-center gap-3">
-          <Link to="/dashboard" className="text-text-muted hover:text-gold"><ArrowLeft className="h-4 w-4" /></Link>
-          <span className="font-mono text-sm text-gold">{String(caseNumber)}</span>
-          {isLoading && <Loader className="h-3 w-3 animate-spin text-blue-400" />}
+          <Link to="/dashboard" className="text-muted-foreground hover:text-foreground"><ArrowLeft className="h-4 w-4" /></Link>
+          <span className="font-mono text-sm text-foreground">{String(caseNumber)}</span>
+          {isLoading && <Loader className="h-3 w-3 animate-spin text-foreground/70" />}
         </div>
-        <span className="text-sm text-text-secondary">
-          {job?.status === "completed" ? "Scene Reconstruction" : `Pipeline: ${job?.status || "loading"}`}
+        <span className="text-sm text-muted-foreground">
+          {noJob ? "Pick a reconstruction" : job?.status === "completed" ? "Scene Reconstruction" : `Pipeline: ${job?.status || "loading"}`}
         </span>
-        <div className="flex items-center gap-2">
-          <button className="rounded-[4px] p-1.5 text-text-muted hover:bg-surface hover:text-gold"><Download className="h-4 w-4" /></button>
-          <button className="rounded-[4px] p-1.5 text-text-muted hover:bg-surface hover:text-gold"><Share2 className="h-4 w-4" /></button>
-          <button className="rounded-[4px] p-1.5 text-text-muted hover:bg-surface hover:text-gold"><Expand className="h-4 w-4" /></button>
+        <div className="flex items-center gap-1">
+          <button onClick={handleDownload} disabled={!jobId || job?.status !== "completed"} title="Download JSON" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent"><Download className="h-4 w-4" /></button>
+          <button onClick={handleShare} disabled={!jobId} title="Share link" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40 disabled:hover:bg-transparent"><Share2 className="h-4 w-4" /></button>
+          <button onClick={handleExpand} title="Fullscreen" className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"><Expand className="h-4 w-4" /></button>
         </div>
       </div>
 
