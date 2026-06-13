@@ -292,23 +292,52 @@ function SceneViewer() {
 
         {/* 3D Canvas */}
         <div className="relative flex-1">
-          {isLoading ? (
+          {noJob ? (
+            <div className="flex h-full items-center justify-center p-8">
+              <div className="w-full max-w-md text-center">
+                <FileText className="mx-auto h-10 w-10 text-muted-foreground" />
+                <p className="mt-4 text-base font-semibold text-foreground">Pick a reconstruction to view</p>
+                <p className="mt-1 text-sm text-muted-foreground">No reconstruction selected. Choose a completed case below or submit a new FIR.</p>
+                <div className="mt-6 max-h-[40vh] space-y-1 overflow-y-auto rounded-md border border-border bg-card p-2 text-left">
+                  {recentJobs.length === 0 && (
+                    <p className="px-3 py-6 text-center text-xs text-muted-foreground">No cases yet.</p>
+                  )}
+                  {recentJobs.map((j) => (
+                    <button
+                      key={j.id}
+                      onClick={() => setResolvedJobId(j.id)}
+                      className="flex w-full items-center justify-between rounded px-3 py-2 text-left text-sm transition-colors hover:bg-muted"
+                    >
+                      <span className="font-mono text-foreground">{j.case_number || j.id.slice(0, 8)}</span>
+                      <span className="text-[11px] uppercase tracking-wider text-muted-foreground">{j.status}</span>
+                    </button>
+                  ))}
+                </div>
+                <Link to="/dashboard/submit" className="mt-4 inline-block rounded-md bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wider text-primary-foreground">
+                  Submit new FIR
+                </Link>
+              </div>
+            </div>
+          ) : isLoading ? (
             <div className="flex h-full items-center justify-center">
               <div className="text-center">
-                <Loader className="mx-auto h-8 w-8 animate-spin text-gold" />
-                <p className="mt-4 text-sm text-text-muted">Waiting for pipeline to complete...</p>
-                <p className="mt-1 font-mono text-[11px] text-gold">{job?.status || "connecting"}</p>
+                <Loader className="mx-auto h-8 w-8 animate-spin text-foreground/70" />
+                <p className="mt-4 text-sm text-muted-foreground">Waiting for pipeline to complete...</p>
+                <p className="mt-1 font-mono text-[11px] text-foreground">{job?.status || "connecting"}</p>
+                <Link to="/dashboard/processing" search={{ jobId: jobId || "" }} className="mt-4 inline-block text-xs font-semibold uppercase tracking-wider text-foreground underline">
+                  Watch live pipeline
+                </Link>
               </div>
             </div>
           ) : (
             <>
-              <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader className="h-6 w-6 animate-spin text-gold" /></div>}>
+              <Suspense fallback={<div className="flex h-full items-center justify-center"><Loader className="h-6 w-6 animate-spin text-foreground/70" /></div>}>
                 <Scene3DCanvas entities={entities} events={events} />
               </Suspense>
 
               {events.length > 0 && (
-                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 rounded-[4px] border border-gold/20 bg-background/80 px-6 py-3 backdrop-blur-md">
-                  <p className="max-w-md text-center text-sm text-text-primary">
+                <div className="absolute bottom-20 left-1/2 -translate-x-1/2 rounded-md border border-border bg-background/85 px-6 py-3 backdrop-blur-md">
+                  <p className="max-w-md text-center text-sm text-foreground">
                     {events[currentEvent]?.description || ""}
                   </p>
                 </div>
